@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anggota Departemen - KSI Mist</title>
+    <title>Departemen - KSI Mist FMIPA UNY</title>
     <link rel="icon" type="image/jpeg" href="assets/logo/images.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -13,20 +13,36 @@
 </head>
 <body>
 
-    <div class="ticker-wrap" id="ticker-wrap" style="display:none;"><div class="ticker-inner"><div class="ticker-overflow"><div class="ticker-track" id="ticker-track"></div></div></div></div>
-    
+    <div class="ticker-wrap" id="ticker-wrap" style="display:none;">
+        <div class="ticker-inner">
+            <span class="ticker-label">TERBARU</span>
+            <div class="ticker-overflow">
+                <div class="ticker-track" id="ticker-track"></div>
+            </div>
+        </div>
+    </div>
+
     <nav class="navbar" id="navbar">
         <a href="index.html#beranda" class="navbar-brand">
             <img src="assets/logo/images.jpg" class="brand-logo" alt="Logo KSI Mist">
-            <div class="brand-text"><span class="brand-name">KSI Mist</span><span class="brand-sub">FMIPA UNY</span></div>
+            <div class="brand-fallback">KSI</div>
+            <div class="brand-text">
+                <span class="brand-name">KSI Mist</span>
+                <span class="brand-sub">FMIPA UNY</span>
+            </div>
         </a>
         <ul class="navbar-links">
             <li><a href="index.html#beranda">Beranda</a></li>
+            <li><a href="artikel.html">Artikel</a></li>
+            <li><a href="info-lomba.html">Info Lomba</a></li>
+            <li><a href="prestasi.html">Prestasi</a></li>
+            <li><a href="index.html#tentang">Tentang</a></li>
             <li><a href="departemen.html" style="color: var(--primary);">Departemen</a></li>
             <li><a href="hubungi-kami.html" class="btn-hubungi">Hubungi Kami</a></li>
         </ul>
-        <button class="navbar-toggle" id="navbar-toggle"><i class="fas fa-bars"></i></button>
+        <button class="navbar-toggle" id="navbar-toggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
     </nav>
+
 
     <section class="section-dark" style="padding-top: 100px; padding-bottom: 60px; text-align: center;">
         <div class="section-container">
@@ -61,9 +77,49 @@
         </div>
     </section>
 
-    <footer id="hubungi-kami"> ... </footer>
-    <button id="backTop">↑</button>
+    <footer id="hubungi-kami">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <strong>KSI MIST FMIPA UNY</strong>
+                <p>Kelompok Studi Ilmiah MIPA Saintis — Unit Kegiatan Mahasiswa FMIPA Universitas Negeri Yogyakarta.</p>
+                <div class="sosmed">
+                    <a href="https://www.facebook.com/ksi.mist/" target="_blank" class="icon-circle"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.youtube.com/@ksimiststory1255" target="_blank" class="icon-circle"><i class="fab fa-youtube"></i></a>
+                    <a href="https://www.instagram.com/ksimistfmipauny/?hl=id" target="_blank" class="icon-circle"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.linkedin.com/in/ksi-mist-fmipa-uny-405004264/" target="_blank" class="icon-circle"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.tiktok.com/@ksimistfmipauny" target="_blank" class="social-btn"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h5>Navigasi</h5>
+                <a href="index.html#beranda">Beranda</a>
+                <a href="artikel.html">Artikel</a>
+                <a href="info-lomba.html">Info Lomba</a>
+                <a href="prestasi.html">Prestasi</a>
+                <a href="departemen.html">Departemen</a>
+            </div>
+            <div class="footer-col">
+                <h5>Info Lomba</h5>
+                <a href="#">LKTI</a>
+                <a href="#">Essay</a>
+                <a href="#">Desain</a>
+                <a href="#">BPC</a>
+                <a href="#">Internasional</a>
+            </div>
+            <div class="footer-col">
+                <h5>Kontak Kami</h5>
+                <a href="#"><i class="fas fa-map-marker-alt"></i> FMIPA UNY, Yogyakarta</a>
+                <a href="mailto:ksimist@student.uny.ac.id"><i class="fas fa-envelope"></i> ksimist@student.uny.ac.id</a>
+                <a href="https://wa.me/6289606050600" target="_blank"><i class="fab fa-whatsapp"></i>CP Humas</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© 2026 KSI Pilar Mahakarya 2026. All rights reserved.</span>
+            <span>#InspirasiKeilmiahan 🇮🇩</span>
+        </div>
+    </footer>
 
+    <button id="backTop" aria-label="Kembali ke atas">↑</button>
     <script src="assets/js/main.js" defer></script>
 </body>
 </html>

@@ -1,0 +1,16 @@
+# Dependencies
+node_modules/
+
+# Environment variables (JANGAN diupload ke GitHub)
+.env
+
+# Folder upload gambar (kosongkan, Railway pakai cloud storage)
+api/uploads/*
+!api/uploads/.gitkeep
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# VS Code
+.vscode/

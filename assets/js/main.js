@@ -1,44 +1,36 @@
 /**
- * main.js — KSI Mist FMIPA UNY
+ * main.js — KSI Mist FMIPA UNY (Full Integrated v2)
  * ─────────────────────────────────────────────────────────
- * Susunan Keseluruhan Kod Dinamik (Admin Integrated)
+ * Menghubungkan semua halaman ke Backend Node.js
  * ─────────────────────────────────────────────────────────
  */
 
 'use strict';
 
+const BASE_URL = 'http://localhost:3000';
+const API_URL  = `${BASE_URL}/api`;
+
 // ═══════════════════════════════════════════════════════════
-// 1. ELEMEN NAVBAR, SKROL, & UI GLOBAL
+// 1. UI GLOBAL (NAVBAR, SCROLL, ANIMASI)
 // ═══════════════════════════════════════════════════════════
 const navbar  = document.getElementById('navbar');
 const backTop = document.getElementById('backTop');
 
 window.addEventListener('scroll', () => {
-    if (navbar) navbar.classList.toggle('scrolled', window.scrollY > 20);
+    if (navbar)  navbar.classList.toggle('scrolled', window.scrollY > 20);
     if (backTop) backTop.classList.toggle('visible', window.scrollY > 400);
 });
 
 if (backTop) {
-    backTop.addEventListener('click', () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    });
+    backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 }
 
-// Navigasi Mobile (Hamburger Menu)
 const navbarToggle = document.getElementById('navbar-toggle');
 const navbarLinks  = document.querySelector('.navbar-links');
-
 if (navbarToggle && navbarLinks) {
-    navbarToggle.addEventListener('click', () => {
-        navbarLinks.classList.toggle('open');
-    });
-
-    navbarLinks.querySelectorAll('a').forEach(link => {
-        link.addEventListener('click', () => navbarLinks.classList.remove('open'));
-    });
+    navbarToggle.addEventListener('click', () => navbarLinks.classList.toggle('open'));
 }
 
-// Animasi Fade-up (Intersection Observer)
 const fadeObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
         if (entry.isIntersecting) {
@@ -53,215 +45,254 @@ function daftarkanFadeUp() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 2. HELPER FETCH DATA API
+// 2. CORE FETCH ENGINE
 // ═══════════════════════════════════════════════════════════
 async function fetchKonten(kategori, limit = 6, extraParams = '') {
     try {
-        const res = await fetch(`api/get_konten.php?kategori=${kategori}&limit=${limit}${extraParams}`);
+        const res = await fetch(`${API_URL}/konten?kategori=${kategori}&limit=${limit}${extraParams}`);
         if (!res.ok) throw new Error(`Gagal fetch: ${kategori}`);
         return await res.json();
     } catch (err) {
-        console.error(err);
+        console.warn('Fetch Error:', err.message);
         return [];
     }
 }
 
 // ═══════════════════════════════════════════════════════════
-// 3. LOGIK PENGURUSAN SECTION KOSONG (Khusus index.html)
-// ═══════════════════════════════════════════════════════════
-function sembunyikanSectionKosong() {
-    const PETA_SECTION = [
-        { wadah: 'wadah-artikel',    section: 'artikel' },
-        { wadah: 'wadah-info-lomba', section: 'info-lomba' },
-        { wadah: 'wadah-prestasi',   section: 'prestasi' },
-        { wadah: 'wadah-pengumuman', section: 'pengumuman' },
-    ];
-
-    PETA_SECTION.forEach(({ wadah, section }) => {
-        const elWadah   = document.getElementById(wadah);
-        const elSection = document.getElementById(section);
-
-        if (elWadah && elSection) {
-            const kosong = elWadah.children.length === 0;
-            elSection.style.display = kosong ? 'none' : '';
-            
-            // Sembunyikan divider sebelumnya jika ada
-            const prev = elSection.previousElementSibling;
-            if (prev && prev.classList.contains('divider')) {
-                prev.style.display = kosong ? 'none' : '';
-            }
-        }
-    });
-}
-
-// ═══════════════════════════════════════════════════════════
-// 4. RENDER KOMPONEN GLOBAL (Ticker, Hero)
+// 3. TICKER (Breaking News)
 // ═══════════════════════════════════════════════════════════
 function renderTicker(items) {
     const track = document.getElementById('ticker-track');
     const wrap  = document.getElementById('ticker-wrap');
     if (!track || !wrap || items.length === 0) return;
-
-    const semua = [...items, ...items]; 
+    const semua = [...items, ...items];
     track.innerHTML = semua.map((item, i) => `
         <a href="${item.href || '#'}">${item.judul}</a>
         ${i < semua.length - 1 ? '<span class="ticker-sep">◆</span>' : ''}
     `).join('');
-    wrap.style.display = '';
+    wrap.style.display = 'block';
 }
 
 // ═══════════════════════════════════════════════════════════
-// 5. INITIALIZERS PER HALAMAN
+// 4. HALAMAN ARTIKEL
 // ═══════════════════════════════════════════════════════════
-
-// --- HALAMAN ARTIKEL ---
 async function initHalamanArtikel() {
-    const wadahGrid = document.getElementById('wadah-semua-artikel');
-    if (!wadahGrid) return;
+    const wadah = document.getElementById('wadah-semua-artikel') || document.getElementById('wadah-artikel');
+    if (!wadah) return;
 
     const data = await fetchKonten('artikel', 12);
-    if (data.length === 0) return;
-
-    wadahGrid.innerHTML = data.map(item => `
+    if (!data.length) {
+        wadah.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px 0;">Belum ada artikel.</p>';
+        return;
+    }
+    wadah.innerHTML = data.map(item => `
         <a href="detail.html?id=${item.id}&tipe=artikel" class="card fade-up">
-            <div class="card-thumb" style="min-height: 200px;">
-                <img src="${item.thumbnail || 'assets/default.jpg'}" style="width:100%; height:100%; object-fit:cover;">
+            <div class="card-thumb">
+                <img src="${item.thumbnail_url || 'assets/logo/images.jpg'}" alt="${item.judul}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
             </div>
-            <div class="card-body" style="padding: 16px 20px;">
-                <div style="font-size: 12px; color: var(--text-light); font-weight: 600;">${item.tanggal}</div>
-                <h3 class="card-title" style="font-size: 16px;">${item.judul}</h3>
+            <div class="card-body">
+                ${item.jenis_artikel ? `<div class="card-tag">${item.jenis_artikel}</div>` : ''}
+                <div class="card-date">${item.tanggal ? new Date(item.tanggal).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) : ''}</div>
+                <h3 class="card-title">${item.judul}</h3>
             </div>
         </a>`).join('');
     daftarkanFadeUp();
 }
 
-// --- HALAMAN INFO LOMBA ---
+// ═══════════════════════════════════════════════════════════
+// 5. HALAMAN INFO LOMBA
+// ═══════════════════════════════════════════════════════════
 async function initHalamanLomba() {
-    const wadahGrid = document.getElementById('wadah-info-lomba');
-    if (!wadahGrid) return;
+    const wadah = document.getElementById('wadah-info-lomba');
+    if (!wadah) return;
 
-    const data = await fetchKonten('info-lomba', 12);
-    wadahGrid.innerHTML = data.map(item => `
-        <a href="detail.html?id=${item.id}&tipe=lomba" class="card fade-up" style="border-bottom: 3px solid var(--tersiary);">
+    const data = await fetchKonten('info-lomba', 24);
+    if (!data.length) {
+        wadah.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px 0;">Belum ada info lomba.</p>';
+        return;
+    }
+
+    const now = new Date();
+    wadah.innerHTML = data.map(item => {
+        const expired = item.deadline && new Date(item.deadline) < now;
+        const ddl     = item.deadline ? new Date(item.deadline).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}) : null;
+        return `
+        <a href="detail.html?id=${item.id}&tipe=lomba" class="card fade-up" style="border-bottom: 3px solid var(--tersiary); ${expired ? 'opacity:0.6;' : ''}">
             <div class="card-thumb" style="aspect-ratio: 4/5;">
-                <img src="${item.thumbnail || 'assets/default-poster.jpg'}" style="width:100%; height:100%; object-fit:cover;">
+                <img src="${item.thumbnail_url || 'assets/logo/images.jpg'}" alt="${item.judul}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
             </div>
-            <div class="card-body" style="padding: 16px; text-align: center;">
-                <div class="card-tag" style="background:var(--tersiary); color:var(--primary); font-size:10px; padding:2px 8px; border-radius:4px; display:inline-block; margin-bottom:8px; font-weight:700;">
-                    ${item.status || 'BUKA'}
-                </div>
-                <h3 class="card-title" style="font-size:14px;">${item.judul}</h3>
-                <div style="font-size: 11px; color: var(--text-light);"><i class="fas fa-clock"></i> Deadline: ${item.deadline || '-'}</div>
+            <div class="card-body" style="text-align:center;">
+                ${item.jenis ? `<div class="card-tag">${item.jenis}</div>` : ''}
+                <h3 class="card-title">${item.judul}</h3>
+                ${item.tingkat ? `<div style="font-size:11px;color:var(--muted);margin-top:4px;">${item.tingkat}</div>` : ''}
+                ${ddl ? `<div style="font-size:11px;margin-top:6px;font-weight:700;color:${expired ? 'var(--muted)' : 'var(--primary)'};">${expired ? 'Deadline: ' : '⏰ Deadline: '}${ddl}</div>` : ''}
             </div>
-        </a>`).join('');
+        </a>`;
+    }).join('');
     daftarkanFadeUp();
 }
 
-// --- HALAMAN PRESTASI ---
+// ═══════════════════════════════════════════════════════════
+// 6. HALAMAN PRESTASI
+// ═══════════════════════════════════════════════════════════
 async function initHalamanPrestasi() {
-    const wadahGrid = document.getElementById('wadah-prestasi');
-    if (!wadahGrid) return;
+    const wadah = document.getElementById('wadah-prestasi');
+    if (!wadah) return;
 
-    const data = await fetchKonten('prestasi', 12);
-    const medalMap = { '1': '🥇', '2': '🥈', '3': '🥉' };
+    const data = await fetchKonten('prestasi', 24);
+    if (!data.length) {
+        wadah.innerHTML = '<p style="text-align:center;color:var(--muted);padding:40px 0;">Belum ada data prestasi.</p>';
+        return;
+    }
 
-    wadahGrid.innerHTML = data.map(item => `
+    const medalMap = { '1':'🥇', '2':'🥈', '3':'🥉' };
+    wadah.innerHTML = data.map(item => `
         <div class="card fade-up">
-            <div class="card-thumb" style="min-height: 250px;">
-                <img src="${item.thumbnail || 'assets/default.jpg'}" style="width:100%; height:100%; object-fit:cover;">
+            <div class="card-thumb" style="min-height:220px;">
+                <img src="${item.thumbnail_url || 'assets/logo/images.jpg'}" alt="${item.judul}" style="width:100%;height:100%;object-fit:cover;" loading="lazy">
             </div>
-            <div class="card-body" style="padding: 16px 20px; border-top: 4px solid var(--primary);">
-                <div style="font-size: 11px; color: var(--primary); font-weight: 800;">
-                    ${medalMap[item.peringkat] || '🏆'} JUARA ${item.peringkat} • ${item.tingkat}
+            <div class="card-body" style="border-top:4px solid var(--primary);">
+                <div style="font-size:11px;color:var(--primary);font-weight:800;margin-bottom:4px;">
+                    ${medalMap[item.peringkat] || '🏆'} ${item.peringkat ? 'JUARA ' + item.peringkat : 'PRESTASI'}
+                    ${item.tingkat_prestasi ? ` · ${item.tingkat_prestasi.toUpperCase()}` : ''}
                 </div>
-                <h3 class="card-title" style="font-size:14px; margin-block:5px;">${item.judul}</h3>
-                <div style="font-size: 12px; color: var(--text-light);">${item.nama_pemenang || ''}</div>
+                <h3 class="card-title">${item.judul}</h3>
+                ${item.nama_kompetisi ? `<div style="font-size:12px;color:var(--muted);margin-top:4px;">${item.nama_kompetisi}</div>` : ''}
+                ${item.anggota_tim    ? `<div style="font-size:11px;color:var(--muted);margin-top:6px;font-style:italic;">${item.anggota_tim}</div>` : ''}
             </div>
         </div>`).join('');
     daftarkanFadeUp();
 }
 
-// --- HALAMAN DAFTAR DEPARTEMEN ---
+// ═══════════════════════════════════════════════════════════
+// 7. HALAMAN DEPARTEMEN
+// ═══════════════════════════════════════════════════════════
 async function initHalamanDepartemen() {
-    const wadahDept = document.getElementById('wadah-departemen');
-    if (!wadahDept) return;
+    const wadah = document.getElementById('wadah-departemen');
+    if (!wadah) return;
 
-    const data = await fetchKonten('departemen');
-    wadahDept.innerHTML = data.map(dept => `
-        <a href="detail-departemen.html?id=${dept.id}" class="card fade-up" style="padding: 40px 20px; text-align: center; border-bottom: 4px solid ${dept.warna || 'var(--primary)'};">
-            <div class="poin-icon" style="background: ${dept.warna || 'var(--primary)'}; color: var(--secondary); width: 80px; height: 80px; margin: 0 auto 16px auto; font-size: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%;">
-                <i class="fas ${dept.ikon || 'fa-users'}"></i>
-            </div>
-            <h3 class="card-title font-bebas" style="font-size: 24px;">${dept.nama}</h3>
-            <p class="card-excerpt">${dept.slogan || ''}</p>
-        </a>`).join('');
-    daftarkanFadeUp();
+    try {
+        const res  = await fetch(`${API_URL}/departemen`);
+        const data = await res.json();
+
+        // Sembunyikan Pengurus Inti dari grid departemen publik
+        const publik = data.filter(d => d.kode !== 'INTI');
+
+        wadah.innerHTML = publik.map(dept => `
+            <a href="detail-departemen.html?id=${dept.id}" class="card fade-up" style="padding:40px 20px;text-align:center;border-bottom:4px solid ${dept.warna};">
+                <div class="poin-icon" style="background:${dept.warna};color:var(--secondary);width:80px;height:80px;margin:0 auto 16px;font-size:36px;display:flex;align-items:center;justify-content:center;border-radius:50%;">
+                    <i class="fas ${dept.ikon || 'fa-users'}"></i>
+                </div>
+                <h3 class="card-title font-bebas" style="font-size:24px;">${dept.nama}</h3>
+                <p class="card-excerpt">${dept.slogan || ''}</p>
+            </a>`).join('');
+        daftarkanFadeUp();
+    } catch (err) { console.warn(err); }
 }
 
-// --- HALAMAN DETAIL DEPARTEMEN (ANGGOTA) ---
+// ═══════════════════════════════════════════════════════════
+// 8. HALAMAN DETAIL DEPARTEMEN
+// ═══════════════════════════════════════════════════════════
 async function initHalamanDetailDepartemen() {
     const wadahPimpinan = document.getElementById('wadah-pimpinan');
     if (!wadahPimpinan) return;
 
     const urlParams = new URLSearchParams(window.location.search);
-    const deptId = urlParams.get('id');
+    const deptId    = urlParams.get('id');
     if (!deptId) return;
 
     try {
-        // Render Nama & Deskripsi Dept
-        const resDept = await fetch(`api/get_konten.php?kategori=departemen_info&id=${deptId}`);
-        const info = await resDept.json();
-        if(info) {
-            document.getElementById('nama-departemen-detail').innerHTML = `${info.nama_prefix || 'Departemen'} <span>${info.nama}</span>`;
-            document.getElementById('deskripsi-departemen-detail').innerText = info.deskripsi;
+        // Info departemen
+        const dept = await fetch(`${API_URL}/departemen/${deptId}`).then(r => r.json());
+        if (dept) {
+            const elNama = document.getElementById('nama-departemen-detail');
+            const elDesk = document.getElementById('deskripsi-departemen-detail');
+            if (elNama) elNama.innerHTML = `Departemen <span>${dept.nama}</span>`;
+            if (elDesk) elDesk.textContent = dept.deskripsi || '';
         }
 
-        // Render Anggota
-        const anggota = await fetchKonten('anggota', 50, `&dept_id=${deptId}`);
-        
-        const renderList = (targetId, sectionId, filterKey) => {
-            const target = document.getElementById(targetId);
-            const filtered = anggota.filter(m => m.kategori_jabatan === filterKey);
-            if(filtered.length > 0) {
+        // Anggota departemen
+        const anggota = await fetch(`${API_URL}/pengurus?dept_id=${deptId}`).then(r => r.json());
+
+        const renderList = (targetId, sectionId, dividerClass, levelKey) => {
+            const target   = document.getElementById(targetId);
+            const section  = document.getElementById(sectionId);
+            const divider  = document.querySelector(`.${dividerClass}`);
+            const filtered = anggota.filter(m => m.jabatan_level === levelKey);
+
+            if (filtered.length > 0 && target && section) {
                 target.innerHTML = filtered.map(m => `
                     <div class="member-card fade-up">
-                        <img src="${m.foto || 'https://ui-avatars.com/api/?name='+m.nama}" class="member-photo" alt="${m.nama}">
+                        <img src="${m.foto_url}" class="member-photo" alt="${m.nama}" loading="lazy" onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(m.nama)}&background=8B1A1A&color=FDF3C0'">
                         <div class="member-name">${m.nama}</div>
                         <div class="member-role">${m.jabatan}</div>
-                    </div>
-                `).join('');
-                document.getElementById(sectionId).style.display = 'block';
+                        ${m.prodi ? `<div class="member-role" style="font-size:11px;opacity:0.6">${m.prodi}</div>` : ''}
+                    </div>`).join('');
+                section.style.display = 'block';
+                if (divider) divider.style.display = 'block';
             }
         };
 
-        renderList('wadah-pimpinan', 'section-pimpinan', 'pimpinan');
-        renderList('wadah-ahli', 'section-ahli', 'ahli');
-        renderList('wadah-staf', 'section-staf', 'staf');
-
+        renderList('wadah-pimpinan', 'section-pimpinan', 'divider-pimpinan', 'kepala');
+        renderList('wadah-ahli',     'section-ahli',     'divider-ahli',     'staf_ahli');
+        renderList('wadah-staf',     'section-staf',     '',                 'staf');
         daftarkanFadeUp();
-    } catch (err) { console.error(err); }
+
+    } catch (err) { console.warn(err); }
 }
 
 // ═══════════════════════════════════════════════════════════
-// 11. INITIALIZATION ORCHESTRATOR
+// 9. HALAMAN HUBUNGI KAMI
+// ═══════════════════════════════════════════════════════════
+function initHalamanKontak() {
+    const form = document.querySelector('form');
+    if (!form || !window.location.pathname.includes('hubungi-kami')) return;
+
+    form.onsubmit = async (e) => {
+        e.preventDefault();
+        const btn    = form.querySelector('button[type="submit"]');
+        const inputs = form.querySelectorAll('input, textarea');
+        btn.innerHTML = 'Mengirim... <i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled  = true;
+
+        const payload = {
+            nama:   inputs[0].value,
+            email:  inputs[1].value,
+            subjek: inputs[2].value,
+            isi:    inputs[3].value
+        };
+
+        try {
+            const res    = await fetch(`${API_URL}/pesan`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+            const result = await res.json();
+            if (!res.ok) throw new Error(result.error);
+            alert(result.message);
+            form.reset();
+        } catch (err) {
+            alert('Gagal mengirim pesan: ' + err.message);
+        } finally {
+            btn.innerHTML = 'Kirim Sekarang <i class="fas fa-paper-plane"></i>';
+            btn.disabled  = false;
+        }
+    };
+}
+
+// ═══════════════════════════════════════════════════════════
+// 10. BOOTSTRAPPER
 // ═══════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Jalankan fungsi UI Global
     daftarkanFadeUp();
 
-    // 2. Jalankan Ticker (Berlaku di semua halaman jika elemen ada)
+    // Ticker
     fetchKonten('ticker', 10).then(data => renderTicker(data));
 
-    // 3. Jalankan Init berdasarkan deteksi elemen di halaman
-    if (document.getElementById('beranda')) {
-        // Jika di Home, jalankan orchestrator utama index.html
-        if (typeof initKonten === 'function') initKonten(); 
-        sembunyikanSectionKosong();
-    }
-    
-    if (document.getElementById('wadah-semua-artikel')) initHalamanArtikel();
-    if (document.getElementById('wadah-info-lomba')) initHalamanLomba();
-    if (document.getElementById('wadah-prestasi')) initHalamanPrestasi();
-    if (document.getElementById('wadah-departemen')) initHalamanDepartemen();
-    if (document.getElementById('wadah-pimpinan')) initHalamanDetailDepartemen();
+    // Inisialisasi per halaman berdasarkan elemen yang ada
+    if (document.getElementById('wadah-artikel'))          initHalamanArtikel();
+    if (document.getElementById('wadah-semua-artikel'))    initHalamanArtikel();
+    if (document.getElementById('wadah-info-lomba'))       initHalamanLomba();
+    if (document.getElementById('wadah-prestasi'))         initHalamanPrestasi();
+    if (document.getElementById('wadah-departemen'))       initHalamanDepartemen();
+    if (document.getElementById('wadah-pimpinan'))         initHalamanDetailDepartemen();
+
+    initHalamanKontak();
 });

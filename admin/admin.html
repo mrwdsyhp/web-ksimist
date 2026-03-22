@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard — KSI Mist FMIPA UNY</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════════════════ -->
+<aside class="sidebar">
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            KSI MIST
+            <span>Admin Dashboard</span>
+        </div>
+    </div>
+
+    <nav class="sidebar-nav">
+        <div class="nav-section">Dashboard</div>
+        <div class="nav-item active" onclick="switchTab('beranda')">
+            <i class="fas fa-home"></i> Beranda
+        </div>
+
+        <div class="nav-section">Kelola Konten</div>
+        <div class="nav-item" onclick="switchTab('artikel')">
+            <i class="fas fa-newspaper"></i> Artikel &amp; Kegiatan
+        </div>
+        <div class="nav-item" onclick="switchTab('lomba')">
+            <i class="fas fa-trophy"></i> Info Lomba
+        </div>
+        <div class="nav-item" onclick="switchTab('prestasi')">
+            <i class="fas fa-award"></i> Prestasi
+        </div>
+
+        <div class="nav-section">Organisasi</div>
+        <div class="nav-item" onclick="switchTab('pengurus')">
+            <i class="fas fa-users-cog"></i> Pengurus &amp; Departemen
+        </div>
+
+        <div class="nav-section">Komunikasi</div>
+        <div class="nav-item" onclick="switchTab('pesan'); loadPesan();" id="nav-pesan">
+            <i class="fas fa-envelope"></i> Pesan Masuk
+            <span class="badge" id="badge-pesan" style="display:none">0</span>
+        </div>
+    </nav>
+
+    <div class="sidebar-footer">
+        <a href="../index.html" target="_blank">
+            <i class="fas fa-external-link-alt"></i> Lihat Website
+        </a>
+    </div>
+</aside>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MAIN CONTENT
+═══════════════════════════════════════════════════════ -->
+<main class="main">
+
+    <div class="topbar">
+        <div class="topbar-left">
+            <h1 id="page-title">Beranda</h1>
+            <p id="page-sub">Selamat datang di panel admin KSI Mist</p>
+        </div>
+        <div class="topbar-right">
+            <div class="avatar">A</div>
+            <span class="admin-name">Administrator</span>
+        </div>
+    </div>
+
+    <div class="content">
+
+        <!-- ─── TAB: BERANDA ─────────────────────────────── -->
+        <div id="view-beranda" class="tab-view active">
+
+            <div class="stat-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:rgba(139,26,26,0.1);color:var(--primary)">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="stat-artikel">—</div>
+                        <div class="stat-lbl">Artikel</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:rgba(212,175,55,0.12);color:var(--gold)">
+                        <i class="fas fa-trophy"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="stat-lomba">—</div>
+                        <div class="stat-lbl">Info Lomba</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:rgba(56,161,105,0.12);color:var(--success)">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="stat-prestasi">—</div>
+                        <div class="stat-lbl">Prestasi</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:rgba(49,130,206,0.12);color:var(--info)">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="stat-pengurus">—</div>
+                        <div class="stat-lbl">Pengurus</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background:rgba(229,62,62,0.1);color:var(--danger)">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div>
+                        <div class="stat-val" id="stat-pesan">—</div>
+                        <div class="stat-lbl">Pesan Baru</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Akses Cepat</span>
+                </div>
+                <div class="panel-body" style="display:flex;gap:12px;flex-wrap:wrap;">
+                    <button class="btn btn-primary" onclick="switchTab('artikel'); openModal('modal-konten','artikel')">
+                        <i class="fas fa-plus"></i> Tambah Artikel
+                    </button>
+                    <button class="btn btn-ghost" onclick="switchTab('lomba'); openModal('modal-konten','lomba')">
+                        <i class="fas fa-plus"></i> Tambah Lomba
+                    </button>
+                    <button class="btn btn-ghost" onclick="switchTab('prestasi'); openModal('modal-konten','prestasi')">
+                        <i class="fas fa-plus"></i> Tambah Prestasi
+                    </button>
+                    <button class="btn btn-ghost" onclick="switchTab('pengurus'); setTimeout(()=>openModalPengurus(),200)">
+                        <i class="fas fa-user-plus"></i> Tambah Pengurus
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ─── TAB: ARTIKEL ─────────────────────────────── -->
+        <div id="view-artikel" class="tab-view">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <div class="sub-tabs" style="border-bottom:none;margin-bottom:0;">
+                    <span class="sub-tab active" onclick="filterJenisArtikel(this,'')">Semua</span>
+                    <span class="sub-tab" onclick="filterJenisArtikel(this,'Berita')">Berita</span>
+                    <span class="sub-tab" onclick="filterJenisArtikel(this,'Kegiatan')">Kegiatan</span>
+                    <span class="sub-tab" onclick="filterJenisArtikel(this,'Opini')">Opini</span>
+                    <span class="sub-tab" onclick="filterJenisArtikel(this,'Tutorial')">Tutorial</span>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openModal('modal-konten','artikel')">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
+            </div>
+
+            <div class="panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Thumbnail</th>
+                                <th>Judul</th>
+                                <th>Jenis</th>
+                                <th>Tanggal</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-artikel">
+                            <tr><td colspan="5" class="empty"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ─── TAB: INFO LOMBA ──────────────────────────── -->
+        <div id="view-lomba" class="tab-view">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <div class="sub-tabs" style="border-bottom:none;margin-bottom:0;">
+                    <span class="sub-tab active" onclick="filterJenisLomba(this,'')">Semua</span>
+                    <span class="sub-tab" onclick="filterJenisLomba(this,'LKTI')">LKTI</span>
+                    <span class="sub-tab" onclick="filterJenisLomba(this,'Essay')">Essay</span>
+                    <span class="sub-tab" onclick="filterJenisLomba(this,'PKM')">PKM</span>
+                    <span class="sub-tab" onclick="filterJenisLomba(this,'Desain')">Desain</span>
+                    <span class="sub-tab" onclick="filterJenisLomba(this,'BPC')">BPC</span>
+                    <span class="sub-tab" onclick="filterJenisLomba(this,'Internasional')">Internasional</span>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openModal('modal-konten','lomba')">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
+            </div>
+
+            <div class="panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Poster</th>
+                                <th>Nama Lomba</th>
+                                <th>Jenis</th>
+                                <th>Tingkat</th>
+                                <th>Deadline</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-lomba">
+                            <tr><td colspan="6" class="empty"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ─── TAB: PRESTASI ────────────────────────────── -->
+        <div id="view-prestasi" class="tab-view">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <div class="sub-tabs" style="border-bottom:none;margin-bottom:0;">
+                    <span class="sub-tab active" onclick="filterTingkatPrestasi(this,'')">Semua</span>
+                    <span class="sub-tab" onclick="filterTingkatPrestasi(this,'Nasional')">Nasional</span>
+                    <span class="sub-tab" onclick="filterTingkatPrestasi(this,'Internasional')">Internasional</span>
+                    <span class="sub-tab" onclick="filterTingkatPrestasi(this,'Regional')">Regional</span>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="openModal('modal-konten','prestasi')">
+                    <i class="fas fa-plus"></i> Tambah
+                </button>
+            </div>
+
+            <div class="panel">
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Foto</th>
+                                <th>Judul / Kompetisi</th>
+                                <th>Juara</th>
+                                <th>Tingkat</th>
+                                <th>Tahun</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-prestasi">
+                            <tr><td colspan="6" class="empty"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ─── TAB: PENGURUS ────────────────────────────── -->
+        <div id="view-pengurus" class="tab-view">
+
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h2 style="font-size:16px;font-weight:700;color:var(--dark);">Susunan Pengurus KSI Mist 2026</h2>
+                <button class="btn btn-primary btn-sm" onclick="openModalPengurus()">
+                    <i class="fas fa-user-plus"></i> Tambah Pengurus
+                </button>
+            </div>
+
+            <div id="wadah-pengurus">
+                <div class="empty">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <p>Memuat data pengurus...</p>
+                </div>
+            </div>
+
+        </div>
+
+
+        <!-- ─── TAB: PESAN MASUK ─────────────────────────── -->
+        <div id="view-pesan" class="tab-view">
+
+            <div class="panel">
+                <div class="panel-header">
+                    <span class="panel-title">Pesan Masuk</span>
+                    <button class="btn btn-ghost btn-sm" onclick="loadPesan()">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+                <div id="wadah-pesan">
+                    <div class="empty">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Memuat pesan...</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div><!-- /content -->
+</main>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL: TAMBAH / EDIT KONTEN
+═══════════════════════════════════════════════════════ -->
+<div id="modal-konten" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title" id="modal-konten-title">Tambah Konten</span>
+            <button class="modal-close" onclick="closeModal('modal-konten')">✕</button>
+        </div>
+        <div class="modal-body">
+            <form id="form-konten">
+                <input type="hidden" id="fk-id">
+                <input type="hidden" id="fk-kategori">
+
+                <div class="form-group">
+                    <label>Judul *</label>
+                    <input type="text" id="fk-judul" class="form-control" placeholder="Judul konten" required>
+                </div>
+
+                <!-- Khusus Artikel -->
+                <div class="form-group" id="grp-jenis-artikel">
+                    <label>Jenis Artikel</label>
+                    <select id="fk-jenis-artikel" class="form-control">
+                        <option value="">-- Pilih Jenis --</option>
+                        <option>Berita</option>
+                        <option>Kegiatan</option>
+                        <option>Opini</option>
+                        <option>Tutorial</option>
+                        <option>Lainnya</option>
+                    </select>
+                </div>
+
+                <!-- Khusus Info Lomba -->
+                <div id="grp-lomba">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Jenis Lomba</label>
+                            <select id="fk-jenis" class="form-control">
+                                <option value="">-- Pilih --</option>
+                                <option>LKTI</option>
+                                <option>Essay</option>
+                                <option>PKM</option>
+                                <option>Desain</option>
+                                <option>BPC</option>
+                                <option>Internasional</option>
+                                <option>Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tingkat</label>
+                            <select id="fk-tingkat" class="form-control">
+                                <option value="">-- Pilih --</option>
+                                <option>Nasional</option>
+                                <option>Internasional</option>
+                                <option>Regional</option>
+                                <option>Internal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Deadline Pendaftaran</label>
+                            <input type="date" id="fk-deadline" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label>Link Daftar / Flyer</label>
+                            <input type="url" id="fk-link" class="form-control" placeholder="https://...">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Khusus Prestasi -->
+                <div id="grp-prestasi">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Peringkat / Juara</label>
+                            <select id="fk-peringkat" class="form-control">
+                                <option value="">-- Pilih --</option>
+                                <option value="1">Juara 1</option>
+                                <option value="2">Juara 2</option>
+                                <option value="3">Juara 3</option>
+                                <option value="Harapan 1">Harapan 1</option>
+                                <option value="Harapan 2">Harapan 2</option>
+                                <option value="Finalis">Finalis</option>
+                                <option value="Best Paper">Best Paper</option>
+                                <option value="Best Presenter">Best Presenter</option>
+                                <option value="Lainnya">Lainnya</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tingkat Kompetisi</label>
+                            <select id="fk-tingkat-prestasi" class="form-control">
+                                <option value="">-- Pilih --</option>
+                                <option>Nasional</option>
+                                <option>Internasional</option>
+                                <option>Regional</option>
+                                <option>Internal</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nama Kompetisi</label>
+                        <input type="text" id="fk-nama-kompetisi" class="form-control" placeholder="PIMNAS, LKTIN, dll.">
+                    </div>
+                    <div class="form-group">
+                        <label>Anggota Tim (pisahkan koma)</label>
+                        <input type="text" id="fk-anggota-tim" class="form-control" placeholder="Budi, Ani, Citra">
+                    </div>
+                </div>
+
+                <!-- Bersama semua kategori -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tanggal</label>
+                        <input type="date" id="fk-tanggal" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Thumbnail / Poster</label>
+                        <input type="file" id="fk-thumbnail" class="form-control" accept="image/*">
+                        <div class="form-hint">Format JPG/PNG, maks 5MB</div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Deskripsi / Isi</label>
+                    <textarea id="fk-isi" class="form-control" placeholder="Tuliskan detail..."></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full" id="btn-save-konten">
+                    <i class="fas fa-save"></i> Simpan
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL: TAMBAH / EDIT PENGURUS
+═══════════════════════════════════════════════════════ -->
+<div id="modal-pengurus" class="modal-overlay">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title" id="modal-pengurus-title">Tambah Pengurus</span>
+            <button class="modal-close" onclick="closeModal('modal-pengurus')">✕</button>
+        </div>
+        <div class="modal-body">
+            <form id="form-pengurus">
+                <input type="hidden" id="fp-id">
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Nama Lengkap *</label>
+                        <input type="text" id="fp-nama" class="form-control" placeholder="Nama pengurus" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Jabatan *</label>
+                        <input type="text" id="fp-jabatan" class="form-control" placeholder="Cth: Kepala Departemen" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Level Jabatan *</label>
+                        <select id="fp-level" class="form-control" required>
+                            <option value="inti">Pengurus Inti</option>
+                            <option value="kepala">Kepala Departemen</option>
+                            <option value="staf_ahli">Staf Ahli</option>
+                            <option value="staf">Staf</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Departemen</label>
+                        <select id="fp-dept" class="form-control">
+                            <option value="">— Pengurus Inti —</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Angkatan</label>
+                        <input type="number" id="fp-angkatan" class="form-control"
+                               placeholder="2023" min="2000" max="2030">
+                    </div>
+                    <div class="form-group">
+                        <label>Program Studi</label>
+                        <input type="text" id="fp-prodi" class="form-control" placeholder="Fisika, Kimia, dll.">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Foto</label>
+                        <input type="file" id="fp-foto" class="form-control" accept="image/*">
+                    </div>
+                    <div class="form-group">
+                        <label>Urutan Tampil</label>
+                        <input type="number" id="fp-urutan" class="form-control" value="99" min="1" max="999">
+                        <div class="form-hint">Angka kecil tampil lebih dulu</div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-full" id="btn-save-pengurus">
+                    <i class="fas fa-save"></i> Simpan Pengurus
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<!-- Toast Notification -->
+<div id="toast"></div>
+
+<!-- Script Admin — dimuat setelah semua elemen tersedia -->
+<script src="admin.js"></script>
+</body>
+</html>
