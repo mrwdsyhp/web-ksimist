@@ -1,10 +1,14 @@
 {
   "name": "web-ksi",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Backend KSI Mist FMIPA UNY",
+  "main": "api/server.js",
   "scripts": {
+    "start": "node api/server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   },
   "repository": {
     "type": "git",
@@ -21,8 +25,8 @@
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
-    "express": "^5.2.1",
+    "express": "^4.18.2",
     "multer": "^2.1.1",
-    "mysql2": "^3.20.0"
+    "pg": "^8.20.0"
   }
 }

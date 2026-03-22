@@ -1,28 +1,28 @@
 /**
  * server.js — KSI Mist FMIPA UNY
- * Backend Node.js + Express + MySQL (Laragon)
- * ─────────────────────────────────────────────
+ * Backend Node.js + Express + PostgreSQL (Railway)
+ * ─────────────────────────────────────────────────
  * Endpoints:
- *   GET/POST  /api/konten       → artikel, info-lomba, prestasi
- *   DELETE    /api/konten/:id   → hapus konten
- *   GET       /api/departemen   → daftar departemen
- *   GET/PUT   /api/departemen/:id → detail & update dept
- *   GET/POST  /api/pengurus     → daftar & tambah pengurus
- *   DELETE    /api/pengurus/:id → hapus pengurus
- *   POST      /api/pesan        → kirim pesan (dari form kontak)
- *   GET       /api/pesan        → ambil semua pesan masuk
- *   DELETE    /api/pesan/:id    → hapus pesan
- *   GET       /api/stats        → statistik dashboard
+ *   GET/POST  /api/konten         → artikel, info-lomba, prestasi
+ *   GET/PUT/DELETE /api/konten/:id
+ *   GET       /api/departemen
+ *   GET/PUT   /api/departemen/:id
+ *   GET/POST  /api/pengurus
+ *   PUT/DELETE /api/pengurus/:id
+ *   GET/POST  /api/pesan
+ *   PATCH     /api/pesan/:id/baca
+ *   DELETE    /api/pesan/:id
+ *   GET       /api/stats
  */
 
 'use strict';
 
-const express   = require('express');
-const mysql     = require('mysql2');
-const cors      = require('cors');
-const multer    = require('multer');
-const path      = require('path');
-const fs        = require('fs');
+const express = require('express');
+const { Pool } = require('pg');
+const cors    = require('cors');
+const multer  = require('multer');
+const path    = require('path');
+const fs      = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -36,29 +36,23 @@ app.use(express.urlencoded({ extended: true }));
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 app.use('/uploads', express.static(uploadDir));
-
-// Static untuk file frontend (opsional jika dijalankan dari root)
 app.use(express.static(path.join(__dirname)));
 
-// ─── Koneksi Database ─────────────────────────────────────
-const db = mysql.createPool({
-    host:     process.env.DB_HOST     || 'localhost',
-    user:     process.env.DB_USER     || 'root',
-    password: process.env.DB_PASS     || '',
-    database: process.env.DB_NAME     || 'ksi_mist',
-    waitForConnections: true,
-    connectionLimit: 10
+// ─── Koneksi PostgreSQL ───────────────────────────────────
+const db = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: false }
+        : false
 });
 
 // Test koneksi saat startup
-db.getConnection((err, conn) => {
-    if (err) {
-        console.error('❌ Gagal terhubung ke database:', err.message);
-    } else {
-        console.log('✅ Database terhubung!');
-        conn.release();
-    }
-});
+db.connect()
+    .then(client => {
+        console.log('✅ Database PostgreSQL terhubung!');
+        client.release();
+    })
+    .catch(err => console.error('❌ Gagal koneksi database:', err.message));
 
 // ─── Multer (Upload Gambar) ───────────────────────────────
 const storage = multer.diskStorage({
@@ -71,7 +65,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({
     storage,
-    limits: { fileSize: 5 * 1024 * 1024 }, // max 5MB
+    limits: { fileSize: 5 * 1024 * 1024 },
     fileFilter: (req, file, cb) => {
         const allowed = /jpeg|jpg|png|gif|webp/;
         const ok = allowed.test(path.extname(file.originalname).toLowerCase())
@@ -80,10 +74,107 @@ const upload = multer({
     }
 });
 
-// ─── Helper ───────────────────────────────────────────────
-const q = (sql, params) => new Promise((resolve, reject) => {
-    db.query(sql, params, (err, result) => err ? reject(err) : resolve(result));
-});
+// ─── Helper query PostgreSQL ──────────────────────────────
+// PostgreSQL pakai $1, $2, $3 bukan ?
+const q = (sql, params = []) => db.query(sql, params).then(r => r.rows);
+
+// Konversi ? ke $1,$2,$3 untuk kompatibilitas
+function topg(sql) {
+    let i = 0;
+    return sql.replace(/\?/g, () => `$${++i}`);
+}
+
+// Helper q yang support ? style
+const qm = (sql, params = []) => db.query(topg(sql), params).then(r => r.rows);
+
+
+// ═══════════════════════════════════════════════════════════
+// INISIALISASI TABEL (auto-create saat server start)
+// ═══════════════════════════════════════════════════════════
+async function initTabel() {
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS konten (
+            id               SERIAL PRIMARY KEY,
+            kategori         VARCHAR(20)  NOT NULL CHECK (kategori IN ('artikel','info-lomba','prestasi')),
+            judul            VARCHAR(300) NOT NULL,
+            thumbnail        VARCHAR(255) DEFAULT NULL,
+            tanggal          DATE         DEFAULT NULL,
+            isi              TEXT         DEFAULT NULL,
+            jenis_artikel    VARCHAR(20)  DEFAULT NULL,
+            jenis            VARCHAR(20)  DEFAULT NULL,
+            tingkat          VARCHAR(20)  DEFAULT NULL,
+            link_daftar      VARCHAR(500) DEFAULT NULL,
+            deadline         DATE         DEFAULT NULL,
+            peringkat        VARCHAR(50)  DEFAULT NULL,
+            tingkat_prestasi VARCHAR(20)  DEFAULT NULL,
+            nama_kompetisi   VARCHAR(300) DEFAULT NULL,
+            anggota_tim      TEXT         DEFAULT NULL,
+            created_at       TIMESTAMP    DEFAULT NOW(),
+            updated_at       TIMESTAMP    DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS departemen (
+            id       SERIAL PRIMARY KEY,
+            kode     VARCHAR(20)  NOT NULL UNIQUE,
+            nama     VARCHAR(100) NOT NULL,
+            slogan   VARCHAR(200) DEFAULT NULL,
+            deskripsi TEXT        DEFAULT NULL,
+            ikon     VARCHAR(50)  DEFAULT 'fa-users',
+            warna    VARCHAR(20)  DEFAULT '#8B1A1A',
+            urutan   INT          DEFAULT 99
+        );
+
+        CREATE TABLE IF NOT EXISTS pengurus (
+            id            SERIAL PRIMARY KEY,
+            dept_id       INT          DEFAULT NULL,
+            nama          VARCHAR(150) NOT NULL,
+            jabatan       VARCHAR(150) NOT NULL,
+            jabatan_level VARCHAR(20)  NOT NULL DEFAULT 'staf'
+                          CHECK (jabatan_level IN ('inti','kepala','staf_ahli','staf')),
+            angkatan      INT          DEFAULT NULL,
+            prodi         VARCHAR(100) DEFAULT NULL,
+            foto          VARCHAR(255) DEFAULT NULL,
+            urutan        INT          DEFAULT 99,
+            created_at    TIMESTAMP    DEFAULT NOW()
+        );
+
+        CREATE TABLE IF NOT EXISTS pesan (
+            id           SERIAL PRIMARY KEY,
+            nama         VARCHAR(150) NOT NULL,
+            email        VARCHAR(150) NOT NULL,
+            subjek       VARCHAR(300) DEFAULT '(tanpa subjek)',
+            isi          TEXT         NOT NULL,
+            sudah_dibaca SMALLINT     DEFAULT 0,
+            tanggal      TIMESTAMP    DEFAULT NOW()
+        );
+    `);
+
+    // Seed departemen kalau belum ada
+    const cek = await db.query("SELECT COUNT(*) FROM departemen");
+    if (parseInt(cek.rows[0].count) === 0) {
+        await db.query(`
+            INSERT INTO departemen (kode, nama, slogan, deskripsi, ikon, warna, urutan) VALUES
+            ('INTI',  'Pengurus Inti',             'Pilar Kepemimpinan Organisasi',      'Ketua, Wakil Ketua, Sekretaris, dan Bendahara.',                    'fa-crown',          '#D4AF37', 1),
+            ('SDA',   'Sumber Daya Anggota',       'Membangun Insan Unggul Berkualitas', 'Pengembangan kapasitas dan kesejahteraan anggota.',                 'fa-users-cog',      '#8B1A1A', 2),
+            ('KPL',   'Kajian, Penalaran & Lomba', 'Mengasah Nalar, Meraih Prestasi',   'Mendorong budaya riset, kajian ilmiah, dan kompetisi.',             'fa-flask',          '#1A1F3A', 3),
+            ('HI',    'Hubungan & Informasi',      'Jembatan Informasi & Kolaborasi',   'Mengelola komunikasi, media sosial, dan hubungan eksternal.',       'fa-satellite-dish', '#2E8B57', 4),
+            ('RISET', 'Riset',                     'Inovasi Ilmiah Tanpa Henti',        'Mengkoordinasikan kegiatan penelitian dan pengembangan ilmu.',      'fa-microscope',     '#6A0DAD', 5),
+            ('WIRAU', 'Kewirausahaan',             'Menumbuhkan Jiwa Wirausaha Ilmiah', 'Mengembangkan potensi kewirausahaan berbasis sains dan teknologi.', 'fa-rocket',         '#D2691E', 6)
+        `);
+        await db.query(`
+            INSERT INTO pengurus (dept_id, nama, jabatan, jabatan_level, urutan) VALUES
+            (NULL, 'Nama Ketua',         'Ketua Umum',    'inti', 1),
+            (NULL, 'Nama Wakil Ketua',   'Wakil Ketua',   'inti', 2),
+            (NULL, 'Nama Sekretaris I',  'Sekretaris I',  'inti', 3),
+            (NULL, 'Nama Sekretaris II', 'Sekretaris II', 'inti', 4),
+            (NULL, 'Nama Bendahara I',   'Bendahara I',   'inti', 5),
+            (NULL, 'Nama Bendahara II',  'Bendahara II',  'inti', 6)
+        `);
+        console.log('✅ Seed data departemen & pengurus selesai!');
+    }
+
+    console.log('✅ Semua tabel siap!');
+}
 
 
 // ═══════════════════════════════════════════════════════════
@@ -91,18 +182,18 @@ const q = (sql, params) => new Promise((resolve, reject) => {
 // ═══════════════════════════════════════════════════════════
 app.get('/api/stats', async (req, res) => {
     try {
-        const [artikel]   = await q("SELECT COUNT(*) as total FROM konten WHERE kategori = 'artikel'");
-        const [lomba]     = await q("SELECT COUNT(*) as total FROM konten WHERE kategori = 'info-lomba'");
-        const [prestasi]  = await q("SELECT COUNT(*) as total FROM konten WHERE kategori = 'prestasi'");
-        const [pengurus]  = await q("SELECT COUNT(*) as total FROM pengurus");
-        const [pesanBaru] = await q("SELECT COUNT(*) as total FROM pesan WHERE sudah_dibaca = 0");
+        const artikel   = await db.query("SELECT COUNT(*) FROM konten WHERE kategori = 'artikel'");
+        const lomba     = await db.query("SELECT COUNT(*) FROM konten WHERE kategori = 'info-lomba'");
+        const prestasi  = await db.query("SELECT COUNT(*) FROM konten WHERE kategori = 'prestasi'");
+        const pengurus  = await db.query("SELECT COUNT(*) FROM pengurus");
+        const pesanBaru = await db.query("SELECT COUNT(*) FROM pesan WHERE sudah_dibaca = 0");
 
         res.json({
-            artikel:   artikel.total,
-            lomba:     lomba.total,
-            prestasi:  prestasi.total,
-            pengurus:  pengurus.total,
-            pesanBaru: pesanBaru.total
+            artikel:   parseInt(artikel.rows[0].count),
+            lomba:     parseInt(lomba.rows[0].count),
+            prestasi:  parseInt(prestasi.rows[0].count),
+            pengurus:  parseInt(pengurus.rows[0].count),
+            pesanBaru: parseInt(pesanBaru.rows[0].count)
         });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -111,31 +202,28 @@ app.get('/api/stats', async (req, res) => {
 
 
 // ═══════════════════════════════════════════════════════════
-// API: KONTEN (Artikel, Info Lomba, Prestasi)
+// API: KONTEN
 // ═══════════════════════════════════════════════════════════
-
-// GET /api/konten?kategori=artikel&limit=10&jenis=LKTI&search=...
 app.get('/api/konten', async (req, res) => {
     try {
         const { kategori, limit = 10, jenis, search, id } = req.query;
         let sql    = 'SELECT * FROM konten WHERE 1=1';
         const params = [];
+        let i = 1;
 
-        if (kategori) { sql += ' AND kategori = ?'; params.push(kategori); }
-        if (jenis)    { sql += ' AND jenis = ?';    params.push(jenis); }
-        if (id)       { sql += ' AND id = ?';       params.push(id); }
-        if (search)   { sql += ' AND judul LIKE ?'; params.push(`%${search}%`); }
+        if (kategori) { sql += ` AND kategori = $${i++}`; params.push(kategori); }
+        if (jenis)    { sql += ` AND jenis = $${i++}`;    params.push(jenis); }
+        if (id)       { sql += ` AND id = $${i++}`;       params.push(id); }
+        if (search)   { sql += ` AND judul ILIKE $${i++}`; params.push(`%${search}%`); }
 
-        sql += ' ORDER BY id DESC LIMIT ?';
+        sql += ` ORDER BY id DESC LIMIT $${i}`;
         params.push(parseInt(limit));
 
-        const data = await q(sql, params);
-        // Tambahkan full URL untuk thumbnail
-        const result = data.map(item => ({
+        const data = await db.query(sql, params);
+        const host = `${req.protocol}://${req.get('host')}`;
+        const result = data.rows.map(item => ({
             ...item,
-            thumbnail_url: item.thumbnail
-                ? `${req.protocol}://${req.get('host')}/uploads/${item.thumbnail}`
-                : null
+            thumbnail_url: item.thumbnail ? `${host}/uploads/${item.thumbnail}` : null
         }));
         res.json(result);
     } catch (err) {
@@ -143,11 +231,11 @@ app.get('/api/konten', async (req, res) => {
     }
 });
 
-// GET /api/konten/:id — detail satu konten
 app.get('/api/konten/:id', async (req, res) => {
     try {
-        const [item] = await q('SELECT * FROM konten WHERE id = ?', [req.params.id]);
-        if (!item) return res.status(404).json({ error: 'Tidak ditemukan' });
+        const data = await db.query('SELECT * FROM konten WHERE id = $1', [req.params.id]);
+        if (!data.rows[0]) return res.status(404).json({ error: 'Tidak ditemukan' });
+        const item = data.rows[0];
         item.thumbnail_url = item.thumbnail
             ? `${req.protocol}://${req.get('host')}/uploads/${item.thumbnail}`
             : null;
@@ -157,35 +245,40 @@ app.get('/api/konten/:id', async (req, res) => {
     }
 });
 
-// POST /api/konten — tambah konten baru
 app.post('/api/konten', upload.single('thumbnail'), async (req, res) => {
     try {
-        const { kategori, judul, tanggal, isi, jenis, tingkat, peringkat, link_daftar, deadline } = req.body;
+        const { kategori, judul, tanggal, isi, jenis, jenis_artikel, tingkat,
+                peringkat, link_daftar, deadline, tingkat_prestasi, nama_kompetisi, anggota_tim } = req.body;
         if (!kategori || !judul) return res.status(400).json({ error: 'Kategori dan judul wajib diisi!' });
 
         const thumbnail = req.file ? req.file.filename : null;
-        const sql = `INSERT INTO konten
-            (kategori, judul, thumbnail, tanggal, isi, jenis, tingkat, peringkat, link_daftar, deadline)
-            VALUES (?,?,?,?,?,?,?,?,?,?)`;
-        const result = await q(sql, [kategori, judul, thumbnail, tanggal || null, isi || null,
-            jenis || null, tingkat || null, peringkat || null, link_daftar || null, deadline || null]);
-
-        res.json({ message: '✅ Data berhasil disimpan!', id: result.insertId });
+        const result = await db.query(`
+            INSERT INTO konten
+                (kategori, judul, thumbnail, tanggal, isi, jenis, jenis_artikel,
+                 tingkat, peringkat, link_daftar, deadline,
+                 tingkat_prestasi, nama_kompetisi, anggota_tim)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+            RETURNING id`,
+            [kategori, judul, thumbnail, tanggal || null, isi || null,
+             jenis || null, jenis_artikel || null, tingkat || null,
+             peringkat || null, link_daftar || null, deadline || null,
+             tingkat_prestasi || null, nama_kompetisi || null, anggota_tim || null]
+        );
+        res.json({ message: '✅ Data berhasil disimpan!', id: result.rows[0].id });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// PUT /api/konten/:id — edit konten
 app.put('/api/konten/:id', upload.single('thumbnail'), async (req, res) => {
     try {
-        const { judul, tanggal, isi, jenis, tingkat, peringkat, link_daftar, deadline } = req.body;
-        const existing = await q('SELECT * FROM konten WHERE id = ?', [req.params.id]);
-        if (!existing[0]) return res.status(404).json({ error: 'Tidak ditemukan' });
+        const { judul, tanggal, isi, jenis, jenis_artikel, tingkat,
+                peringkat, link_daftar, deadline, tingkat_prestasi, nama_kompetisi, anggota_tim } = req.body;
+        const existing = await db.query('SELECT * FROM konten WHERE id = $1', [req.params.id]);
+        if (!existing.rows[0]) return res.status(404).json({ error: 'Tidak ditemukan' });
 
-        let thumbnail = existing[0].thumbnail;
+        let thumbnail = existing.rows[0].thumbnail;
         if (req.file) {
-            // Hapus gambar lama
             if (thumbnail) {
                 const oldPath = path.join(uploadDir, thumbnail);
                 if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
@@ -193,31 +286,36 @@ app.put('/api/konten/:id', upload.single('thumbnail'), async (req, res) => {
             thumbnail = req.file.filename;
         }
 
-        const sql = `UPDATE konten SET
-            judul=?, thumbnail=?, tanggal=?, isi=?,
-            jenis=?, tingkat=?, peringkat=?, link_daftar=?, deadline=?
-            WHERE id=?`;
-        await q(sql, [judul, thumbnail, tanggal || null, isi || null,
-            jenis || null, tingkat || null, peringkat || null,
-            link_daftar || null, deadline || null, req.params.id]);
-
+        await db.query(`
+            UPDATE konten SET
+                judul=$1, thumbnail=$2, tanggal=$3, isi=$4,
+                jenis=$5, jenis_artikel=$6, tingkat=$7, peringkat=$8,
+                link_daftar=$9, deadline=$10,
+                tingkat_prestasi=$11, nama_kompetisi=$12, anggota_tim=$13,
+                updated_at=NOW()
+            WHERE id=$14`,
+            [judul, thumbnail, tanggal || null, isi || null,
+             jenis || null, jenis_artikel || null, tingkat || null,
+             peringkat || null, link_daftar || null, deadline || null,
+             tingkat_prestasi || null, nama_kompetisi || null, anggota_tim || null,
+             req.params.id]
+        );
         res.json({ message: '✅ Data berhasil diperbarui!' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// DELETE /api/konten/:id
 app.delete('/api/konten/:id', async (req, res) => {
     try {
-        const [item] = await q('SELECT thumbnail FROM konten WHERE id = ?', [req.params.id]);
-        if (!item) return res.status(404).json({ error: 'Tidak ditemukan' });
+        const data = await db.query('SELECT thumbnail FROM konten WHERE id = $1', [req.params.id]);
+        if (!data.rows[0]) return res.status(404).json({ error: 'Tidak ditemukan' });
 
-        if (item.thumbnail) {
-            const filePath = path.join(uploadDir, item.thumbnail);
-            if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        if (data.rows[0].thumbnail) {
+            const fp = path.join(uploadDir, data.rows[0].thumbnail);
+            if (fs.existsSync(fp)) fs.unlinkSync(fp);
         }
-        await q('DELETE FROM konten WHERE id = ?', [req.params.id]);
+        await db.query('DELETE FROM konten WHERE id = $1', [req.params.id]);
         res.json({ message: '🗑️ Data berhasil dihapus!' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -228,34 +326,32 @@ app.delete('/api/konten/:id', async (req, res) => {
 // ═══════════════════════════════════════════════════════════
 // API: DEPARTEMEN
 // ═══════════════════════════════════════════════════════════
-
-// GET /api/departemen
 app.get('/api/departemen', async (req, res) => {
     try {
-        const data = await q('SELECT * FROM departemen ORDER BY urutan ASC');
-        res.json(data);
+        const data = await db.query('SELECT * FROM departemen ORDER BY urutan ASC');
+        res.json(data.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// GET /api/departemen/:id
 app.get('/api/departemen/:id', async (req, res) => {
     try {
-        const [dept] = await q('SELECT * FROM departemen WHERE id = ?', [req.params.id]);
-        if (!dept) return res.status(404).json({ error: 'Departemen tidak ditemukan' });
-        res.json(dept);
+        const data = await db.query('SELECT * FROM departemen WHERE id = $1', [req.params.id]);
+        if (!data.rows[0]) return res.status(404).json({ error: 'Departemen tidak ditemukan' });
+        res.json(data.rows[0]);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// PUT /api/departemen/:id — update info departemen
 app.put('/api/departemen/:id', async (req, res) => {
     try {
         const { nama, slogan, deskripsi, ikon, warna } = req.body;
-        await q('UPDATE departemen SET nama=?, slogan=?, deskripsi=?, ikon=?, warna=? WHERE id=?',
-            [nama, slogan, deskripsi, ikon, warna, req.params.id]);
+        await db.query(
+            'UPDATE departemen SET nama=$1, slogan=$2, deskripsi=$3, ikon=$4, warna=$5 WHERE id=$6',
+            [nama, slogan, deskripsi, ikon, warna, req.params.id]
+        );
         res.json({ message: '✅ Departemen diperbarui!' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -264,10 +360,8 @@ app.put('/api/departemen/:id', async (req, res) => {
 
 
 // ═══════════════════════════════════════════════════════════
-// API: PENGURUS (Inti + Departemen)
+// API: PENGURUS
 // ═══════════════════════════════════════════════════════════
-
-// GET /api/pengurus?dept_id=0&jabatan_level=pimpinan
 app.get('/api/pengurus', async (req, res) => {
     try {
         const { dept_id, jabatan_level } = req.query;
@@ -276,17 +370,25 @@ app.get('/api/pengurus', async (req, res) => {
                    LEFT JOIN departemen d ON p.dept_id = d.id
                    WHERE 1=1`;
         const params = [];
+        let i = 1;
 
-        if (dept_id !== undefined) { sql += ' AND p.dept_id = ?'; params.push(dept_id); }
-        if (jabatan_level)         { sql += ' AND p.jabatan_level = ?'; params.push(jabatan_level); }
+        if (dept_id !== undefined && dept_id !== '') {
+            sql += ` AND p.dept_id = $${i++}`;
+            params.push(dept_id);
+        }
+        if (jabatan_level) {
+            sql += ` AND p.jabatan_level = $${i++}`;
+            params.push(jabatan_level);
+        }
 
         sql += ' ORDER BY p.urutan ASC, p.id ASC';
-        const data = await q(sql, params);
+        const data = await db.query(sql, params);
+        const host = `${req.protocol}://${req.get('host')}`;
 
-        const result = data.map(p => ({
+        const result = data.rows.map(p => ({
             ...p,
             foto_url: p.foto
-                ? `${req.protocol}://${req.get('host')}/uploads/${p.foto}`
+                ? `${host}/uploads/${p.foto}`
                 : `https://ui-avatars.com/api/?name=${encodeURIComponent(p.nama)}&background=8B1A1A&color=FDF3C0&size=200`
         }));
         res.json(result);
@@ -295,32 +397,31 @@ app.get('/api/pengurus', async (req, res) => {
     }
 });
 
-// POST /api/pengurus
 app.post('/api/pengurus', upload.single('foto'), async (req, res) => {
     try {
         const { nama, jabatan, jabatan_level, dept_id, angkatan, prodi, urutan } = req.body;
         if (!nama || !jabatan) return res.status(400).json({ error: 'Nama dan jabatan wajib diisi!' });
 
         const foto = req.file ? req.file.filename : null;
-        const sql = `INSERT INTO pengurus (nama, jabatan, jabatan_level, dept_id, angkatan, prodi, foto, urutan)
-                     VALUES (?,?,?,?,?,?,?,?)`;
-        const result = await q(sql, [nama, jabatan, jabatan_level || 'staf',
-            dept_id || 0, angkatan || null, prodi || null, foto, urutan || 99]);
-
-        res.json({ message: '✅ Pengurus berhasil ditambahkan!', id: result.insertId });
+        const result = await db.query(`
+            INSERT INTO pengurus (nama, jabatan, jabatan_level, dept_id, angkatan, prodi, foto, urutan)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING id`,
+            [nama, jabatan, jabatan_level || 'staf',
+             dept_id || null, angkatan || null, prodi || null, foto, urutan || 99]
+        );
+        res.json({ message: '✅ Pengurus berhasil ditambahkan!', id: result.rows[0].id });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// PUT /api/pengurus/:id
 app.put('/api/pengurus/:id', upload.single('foto'), async (req, res) => {
     try {
         const { nama, jabatan, jabatan_level, dept_id, angkatan, prodi, urutan } = req.body;
-        const [existing] = await q('SELECT * FROM pengurus WHERE id = ?', [req.params.id]);
-        if (!existing) return res.status(404).json({ error: 'Tidak ditemukan' });
+        const existing = await db.query('SELECT * FROM pengurus WHERE id = $1', [req.params.id]);
+        if (!existing.rows[0]) return res.status(404).json({ error: 'Tidak ditemukan' });
 
-        let foto = existing.foto;
+        let foto = existing.rows[0].foto;
         if (req.file) {
             if (foto) {
                 const old = path.join(uploadDir, foto);
@@ -329,28 +430,30 @@ app.put('/api/pengurus/:id', upload.single('foto'), async (req, res) => {
             foto = req.file.filename;
         }
 
-        await q(`UPDATE pengurus SET nama=?, jabatan=?, jabatan_level=?, dept_id=?,
-                 angkatan=?, prodi=?, foto=?, urutan=? WHERE id=?`,
-            [nama, jabatan, jabatan_level, dept_id || 0,
-             angkatan || null, prodi || null, foto, urutan || 99, req.params.id]);
-
+        await db.query(`
+            UPDATE pengurus SET
+                nama=$1, jabatan=$2, jabatan_level=$3, dept_id=$4,
+                angkatan=$5, prodi=$6, foto=$7, urutan=$8
+            WHERE id=$9`,
+            [nama, jabatan, jabatan_level, dept_id || null,
+             angkatan || null, prodi || null, foto, urutan || 99, req.params.id]
+        );
         res.json({ message: '✅ Data pengurus diperbarui!' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// DELETE /api/pengurus/:id
 app.delete('/api/pengurus/:id', async (req, res) => {
     try {
-        const [p] = await q('SELECT foto FROM pengurus WHERE id = ?', [req.params.id]);
-        if (!p) return res.status(404).json({ error: 'Tidak ditemukan' });
+        const data = await db.query('SELECT foto FROM pengurus WHERE id = $1', [req.params.id]);
+        if (!data.rows[0]) return res.status(404).json({ error: 'Tidak ditemukan' });
 
-        if (p.foto) {
-            const fp = path.join(uploadDir, p.foto);
+        if (data.rows[0].foto) {
+            const fp = path.join(uploadDir, data.rows[0].foto);
             if (fs.existsSync(fp)) fs.unlinkSync(fp);
         }
-        await q('DELETE FROM pengurus WHERE id = ?', [req.params.id]);
+        await db.query('DELETE FROM pengurus WHERE id = $1', [req.params.id]);
         res.json({ message: '🗑️ Pengurus berhasil dihapus!' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -361,45 +464,42 @@ app.delete('/api/pengurus/:id', async (req, res) => {
 // ═══════════════════════════════════════════════════════════
 // API: PESAN MASUK
 // ═══════════════════════════════════════════════════════════
-
-// POST /api/pesan — dari form Hubungi Kami
 app.post('/api/pesan', async (req, res) => {
     try {
         const { nama, email, subjek, isi } = req.body;
         if (!nama || !email || !isi) return res.status(400).json({ error: 'Data tidak lengkap!' });
 
-        await q('INSERT INTO pesan (nama, email, subjek, isi) VALUES (?,?,?,?)',
-            [nama, email, subjek || '(tanpa subjek)', isi]);
+        await db.query(
+            'INSERT INTO pesan (nama, email, subjek, isi) VALUES ($1,$2,$3,$4)',
+            [nama, email, subjek || '(tanpa subjek)', isi]
+        );
         res.json({ message: '✅ Pesan berhasil dikirim! Kami akan segera merespons.' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// GET /api/pesan
 app.get('/api/pesan', async (req, res) => {
     try {
-        const data = await q('SELECT * FROM pesan ORDER BY tanggal DESC');
-        res.json(data);
+        const data = await db.query('SELECT * FROM pesan ORDER BY tanggal DESC');
+        res.json(data.rows);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// PATCH /api/pesan/:id/baca — tandai sudah dibaca
 app.patch('/api/pesan/:id/baca', async (req, res) => {
     try {
-        await q('UPDATE pesan SET sudah_dibaca = 1 WHERE id = ?', [req.params.id]);
+        await db.query('UPDATE pesan SET sudah_dibaca = 1 WHERE id = $1', [req.params.id]);
         res.json({ message: 'Ditandai sudah dibaca' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// DELETE /api/pesan/:id
 app.delete('/api/pesan/:id', async (req, res) => {
     try {
-        await q('DELETE FROM pesan WHERE id = ?', [req.params.id]);
+        await db.query('DELETE FROM pesan WHERE id = $1', [req.params.id]);
         res.json({ message: '🗑️ Pesan dihapus!' });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -415,8 +515,9 @@ app.use((err, req, res, next) => {
 
 // ─── Start Server ─────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`\n🚀 Server KSI Mist aktif di http://localhost:${PORT}`);
     console.log(`📂 Upload folder: ${uploadDir}`);
-    console.log('─────────────────────────────────────────\n');
+    console.log('─────────────────────────────────────────');
+    await initTabel();
 });
