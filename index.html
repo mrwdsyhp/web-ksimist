@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UKMF KSI Mist FMIPA UNY</title>
+    <link rel="icon" type="image/jpeg" href="assets/logo/images.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="output.css">
+</head>
+<body>
+
+    <!-- ═══════════════════════════════════════════
+         TICKER — running news bar
+         Disembunyikan dulu, ditampilkan JS hanya
+         jika ada data dari API admin
+    ════════════════════════════════════════════ -->
+    <div class="ticker-wrap" id="ticker-wrap" style="display:none;">
+        <div class="ticker-inner">
+            <span class="ticker-label">TERBARU</span>
+            <div class="ticker-overflow">
+                <!-- Diisi sepenuhnya oleh main.js dari API admin -->
+                <div class="ticker-track" id="ticker-track"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         NAVBAR
+    ════════════════════════════════════════════ -->
+    <nav class="navbar" id="navbar">
+        <a href="#beranda" class="navbar-brand">
+            <img src="assets/logo/images.jpg" class="brand-logo" alt="Logo KSI Mist">
+            <div class="brand-fallback">KSI</div>
+            <div class="brand-text">
+                <span class="brand-name">KSI Mist</span>
+                <span class="brand-sub">FMIPA UNY</span>
+            </div>
+        </a>
+        <ul class="navbar-links">
+            <li><a href="#beranda">Beranda</a></li>
+            <li><a href="#artikel">Artikel</a></li>
+            <li><a href="#info-lomba">Info Lomba</a></li>
+            <li><a href="#prestasi">Prestasi</a></li>
+            <li><a href="#tentang">Tentang</a></li>
+            <li><a href="#departemen">Departemen</a></li>
+            <li><a href="#hubungi-kami" class="btn-hubungi">Hubungi Kami</a></li>
+        </ul>
+        <button class="navbar-toggle" id="navbar-toggle" aria-label="Toggle menu">
+            <i class="fas fa-bars"></i>
+        </button>
+    </nav>
+
+    <!-- ═══════════════════════════════════════════
+         HERO / BERANDA
+    ════════════════════════════════════════════ -->
+    <section id="beranda" class="hero">
+        <div class="hero-bg"></div>
+        <div class="hero-grid-bg"></div>
+        <div class="hero-content">
+            <div class="hero-left">
+                <div class="hero-badge">
+                    <span class="hero-badge-dot"></span>
+                    Aktif sejak 6 Juli 2002
+                </div>
+                <h1 class="hero-title">
+                    Inspirasi
+                    <span class="hero-title-highlight">Keilmiahan</span>
+                    <span class="hero-title-stroke"></span>
+                </h1>
+                <p class="hero-subtitle">
+                    KSI Mist adalah wadah bagi pengembangan penalaran, penelitian, dan pengabdian masyarakat — tempat riset, kompetisi, dan inovasi bertemu untuk menciptakan dampak nyata.
+                </p>
+                <div class="hero-cta">
+                    <a href="#tentang" class="btn-primary">
+                        Kenali Kami <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#artikel" class="btn-outline">
+                        <i class="fas fa-newspaper"></i> Lihat Artikel
+                    </a>
+                </div>
+            </div>
+            <!-- hero-right: kosong saat load, ditampilkan JS hanya jika ada data dari API -->
+            <div class="hero-right" id="hero-right" style="display:none;">
+                <!-- Kartu preview artikel terbaru — diisi renderHeroPreview() di main.js -->
+                <div id="hero-preview-artikel"></div>
+                <!-- Kartu preview lomba terbaru — diisi renderHeroPreview() di main.js -->
+                <div id="hero-preview-lomba"></div>
+                <!-- Stats selalu tampil jika hero-right muncul -->
+                <div class="hero-stats">
+                    <div class="hero-stat">
+                        <div class="hero-stat-num">20+</div>
+                        <div class="hero-stat-label">Tahun Aktif</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-num">120+</div>
+                        <div class="hero-stat-label">Prestasi</div>
+                    </div>
+                    <div class="hero-stat">
+                        <div class="hero-stat-num">500+</div>
+                        <div class="hero-stat-label">Alumni</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         ARTIKEL & KEGIATAN
+         Section ini otomatis TERSEMBUNYI jika
+         #wadah-artikel kosong (tidak ada konten admin)
+    ════════════════════════════════════════════ -->
+    <section id="artikel" class="section-wrapper">
+        <div class="section-container">
+            <div class="section-header fade-up">
+                <div class="section-eyebrow">Terbaru dari kami</div>
+                <h2 class="section-title">Artikel <span>&amp; Kegiatan</span></h2>
+                <p class="section-desc">Ikuti perkembangan terbaru seputar kegiatan, riset, dan pencapaian KSI Mist FMIPA UNY.</p>
+            </div>
+            <div class="artikel-grid" id="wadah-artikel">
+                <!-- Diisi oleh JS dari API admin -->
+            </div>
+            <div class="section-footer fade-up" id="footer-artikel">
+                <a href="artikel.html" class="btn-lihat-semua">
+                    Lihat Semua Artikel <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ═══════════════════════════════════════════
+         INFO LOMBA
+         Tersembunyi otomatis jika kosong
+    ════════════════════════════════════════════ -->
+    <div id="info-lomba" class="section-dark">
+        <div class="section-container">
+            <div class="section-header fade-up">
+                <div class="section-eyebrow light">Kompetisi &amp; Lomba</div>
+                <h2 class="section-title light">Info <span>Lomba</span></h2>
+                <p class="section-desc light">Kompetisi terkini yang bisa kamu ikuti — dari tingkat lokal hingga internasional.</p>
+            </div>
+            <div class="lomba-grid" id="wadah-info-lomba">
+                <!-- Diisi oleh JS dari API admin -->
+            </div>
+            <div class="section-footer fade-up" id="footer-info-lomba">
+                <a href="infolomba.html" class="btn-lihat-semua light">
+                    Lihat Semua Lomba <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         PRESTASI
+         Tersembunyi otomatis jika kosong
+    ════════════════════════════════════════════ -->
+    <section id="prestasi" class="section-wrapper">
+        <div class="section-container">
+            <div class="section-header fade-up">
+                <div class="section-eyebrow">Capaian terbaik kami</div>
+                <h2 class="section-title">Prestasi <span>Gemilang</span></h2>
+                <p class="section-desc">KSI Mist telah melahirkan banyak prestasi membanggakan di berbagai ajang kompetisi ilmiah.</p>
+            </div>
+            <div class="prestasi-grid" id="wadah-prestasi">
+                <!-- Diisi oleh JS dari API admin -->
+            </div>
+            <div class="section-footer fade-up" id="footer-prestasi">
+                <a href="prestasi.html" class="btn-lihat-semua">
+                    Lihat Semua Prestasi <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         STATS STRIP — selalu tampil
+    ════════════════════════════════════════════ -->
+    <div class="stats-strip">
+        <div class="stats-inner">
+            <div class="stat-item fade-up">
+                <div class="stat-num">20+</div>
+                <div class="stat-label">Tahun Berdiri</div>
+            </div>
+            <div class="stat-item fade-up">
+                <div class="stat-num">120+</div>
+                <div class="stat-label">Total Prestasi</div>
+            </div>
+            <div class="stat-item fade-up">
+                <div class="stat-num">500+</div>
+                <div class="stat-label">Alumni Aktif</div>
+            </div>
+            <div class="stat-item fade-up">
+                <div class="stat-num">100+</div>
+                <div class="stat-label">Anggota 2026</div>
+            </div>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- ═══════════════════════════════════════════
+         PENGUMUMAN — tersembunyi jika kosong
+    ════════════════════════════════════════════ -->
+    <section class="section-wrapper">
+        <div class="section-container">
+            <div id="pengumuman">
+                <div class="section-header fade-up">
+                    <div class="section-eyebrow">Informasi penting</div>
+                    <h2 class="section-title">Pengumuman</h2>
+                </div>
+                <div class="pengumuman-list" id="wadah-pengumuman">
+                    <!-- Diisi oleh JS dari API admin -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr class="divider">
+
+    <!-- ═══════════════════════════════════════════
+         TENTANG — 2 kolom: teks kiri, video kanan
+         Ganti VIDEO_ID di bawah dengan ID YouTube-mu
+         Contoh: https://youtu.be/abc123 → ID = abc123
+    ════════════════════════════════════════════ -->
+    <section class="section-wrapper" id="tentang">
+        <div class="section-container">
+            <div class="tentang-wrapper">
+
+                <!-- Kolom kiri: teks & poin -->
+                <div class="tentang-teks">
+                    <div class="section-header fade-up">
+                        <div class="section-eyebrow">Siapa kami</div>
+                        <h2 class="section-title">Tentang <span>KSI Mist</span></h2>
+                    </div>
+                    <p class="tentang-desc fade-up">
+                        KSI Mist (Kelompok Studi Ilmiah MIPA Saintis) adalah unit kegiatan mahasiswa di FMIPA Universitas Negeri Yogyakarta yang berfokus pada pengembangan bidang penalaran, penelitian, dan pengabdian masyarakat sejak tahun 2002.
+                    </p>
+                    <p class="tentang-desc fade-up">
+                        Dengan semangat <strong class="text-primary">"Inspirasi Keilmiahan"</strong>, KSI Mist hadir sebagai wadah eksplorasi ilmiah, kompetisi, dan pengabdian masyarakat.
+                    </p>
+                    <ul class="poin-list">
+                        <li class="poin-item fade-up">
+                            <div class="poin-icon"><i class="fas fa-microscope"></i></div>
+                            <div class="poin-text">
+                                <h4>Riset &amp; Inovasi</h4>
+                                <p>Mendorong anggota aktif melakukan penelitian dan pengembangan karya ilmiah berkualitas tinggi.</p>
+                            </div>
+                        </li>
+                        <li class="poin-item fade-up">
+                            <div class="poin-icon"><i class="fas fa-trophy"></i></div>
+                            <div class="poin-text">
+                                <h4>Kompetisi Ilmiah</h4>
+                                <p>Memfasilitasi keikutsertaan di berbagai lomba dari tingkat lokal hingga internasional.</p>
+                            </div>
+                        </li>
+                        <li class="poin-item fade-up">
+                            <div class="poin-icon"><i class="fas fa-hands-helping"></i></div>
+                            <div class="poin-text">
+                                <h4>Pengabdian Masyarakat</h4>
+                                <p>Mengaplikasikan ilmu pengetahuan untuk dampak nyata bagi masyarakat sekitar.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Kolom kanan: embed YouTube
+                     ↓ GANTI BAGIAN INI ↓
+                     Ambil ID dari link YouTube kamu:
+                     https://youtu.be/VIDEO_ID  atau
+                     https://youtube.com/watch?v=VIDEO_ID -->
+                <div class="tentang-video fade-up">
+                    <div class="video-wrap">
+                        <iframe width="560" height="315" src="https://www.youtube.com/embed/fOfzMWLvULk?si=lZ8m4NFNfgEMyYGv" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                    </div>
+                    <p class="video-caption">
+                        <i class="fab fa-youtube"></i>
+                        Profil &amp; Kegiatan KSI Mist FMIPA UNY
+                    </p>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════════
+         CTA JOIN — selalu tampil
+    ════════════════════════════════════════════ -->
+    <div class="cta-join">
+        <h2 class="fade-up">Bergabung &amp; <span>Eksplorasi</span><br>Dunia Ilmiah</h2>
+        <p class="fade-up">Jadilah bagian dari komunitas peneliti muda terbaik FMIPA UNY. Kembangkan potensimu bersama KSI Mist.</p>
+        <div class="cta-btns fade-up">
+            <a href="#hubungi-kami" class="btn-primary">Daftar Sekarang <i class="fas fa-arrow-right"></i></a>
+            <a href="#tentang" class="btn-outline">Pelajari Lebih Lanjut</a>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════
+         FOOTER
+    ════════════════════════════════════════════ -->
+    <footer id="hubungi-kami">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <strong>KSI MIST FMIPA UNY</strong>
+                <p>Kelompok Studi Ilmiah MIPA Saintis — Unit Kegiatan Mahasiswa FMIPA Universitas Negeri Yogyakarta.</p>
+                <div class="sosmed">
+                    <a href="https://www.facebook.com/ksi.mist/" target="_blank" class="icon-circle"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.youtube.com/@ksimiststory1255" target="_blank" class="icon-circle"><i class="fab fa-youtube"></i></a>
+                    <a href="https://www.instagram.com/ksimistfmipauny/?hl=id" target="_blank" class="icon-circle"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.linkedin.com/in/ksi-mist-fmipa-uny-405004264/" target="_blank" class="icon-circle"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.tiktok.com/@ksimistfmipauny" target="_blank" class="social-btn"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h5>Navigasi</h5>
+                <a href="#beranda">Beranda</a>
+                <a href="#artikel">Artikel &amp; Kegiatan</a>
+                <a href="#info-lomba">Info Lomba</a>
+                <a href="#prestasi">Prestasi</a>
+                <a href="#pengumuman">Pengumuman</a>
+                <a href="departemen.html">Departemen</a>
+            </div>
+            <div class="footer-col">
+                <h5>Info Lomba</h5>
+                <a href="#">LKTI</a>
+                <a href="#">Essay</a>
+                <a href="#">Desain</a>
+                <a href="#">BPC</a>
+                <a href="#">Internasional</a>
+            </div>
+            <div class="footer-col">
+                <h5>Kontak Kami</h5>
+                <a href="#"><i class="fas fa-map-marker-alt"></i> FMIPA UNY, Yogyakarta</a>
+                <a href="mailto:ksimist@uny.ac.id"><i class="fas fa-envelope"></i> ksimist@uny.ac.id</a>
+                <a href="#"><i class="fab fa-instagram"></i> @ksimistfmipauny</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© 2026 KSI Pilar Mahakarya 2026. All rights reserved.</span>
+            <span>#InspirasiKeilmiahan 🇮🇩</span>
+        </div>
+    </footer>
+
+    <!-- Back to top -->
+    <button id="backTop" aria-label="Kembali ke atas">↑</button>
+
+    <script src="assets/js/main.js" defer></script>
+</body>
+</html>
