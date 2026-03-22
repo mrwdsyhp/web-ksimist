@@ -8,7 +8,7 @@
 'use strict';
 
 // ═══════════════════════════════════════════════════════════
-// 1. ELEMEN NAVBAR & SKROL
+// 1. ELEMEN NAVBAR, SKROL, & UI GLOBAL
 // ═══════════════════════════════════════════════════════════
 const navbar  = document.getElementById('navbar');
 const backTop = document.getElementById('backTop');
@@ -24,9 +24,7 @@ if (backTop) {
     });
 }
 
-// ═══════════════════════════════════════════════════════════
-// 2. NAVIGASI MUDAH ALIH (MOBILE TOGGLE)
-// ═══════════════════════════════════════════════════════════
+// Navigasi Mobile (Hamburger Menu)
 const navbarToggle = document.getElementById('navbar-toggle');
 const navbarLinks  = document.querySelector('.navbar-links');
 
@@ -40,9 +38,7 @@ if (navbarToggle && navbarLinks) {
     });
 }
 
-// ═══════════════════════════════════════════════════════════
-// 3. ANIMASI FADE-UP (Intersection Observer)
-// ═══════════════════════════════════════════════════════════
+// Animasi Fade-up (Intersection Observer)
 const fadeObserver = new IntersectionObserver((entries) => {
     entries.forEach((entry, i) => {
         if (entry.isIntersecting) {
@@ -57,40 +53,11 @@ function daftarkanFadeUp() {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 4. LOGIK PENGURUSAN SECTION KOSONG
+// 2. HELPER FETCH DATA API
 // ═══════════════════════════════════════════════════════════
-const PETA_SECTION = [
-    { wadah: 'wadah-artikel',    section: 'artikel',    footer: 'footer-artikel'    },
-    { wadah: 'wadah-info-lomba', section: 'info-lomba', footer: 'footer-info-lomba' },
-    { wadah: 'wadah-prestasi',   section: 'prestasi',   footer: 'footer-prestasi'   },
-    { wadah: 'wadah-pengumuman', section: 'pengumuman', footer: null                },
-];
-
-function sembunyikanSectionKosong() {
-    PETA_SECTION.forEach(({ wadah, section, footer }) => {
-        const elWadah   = document.getElementById(wadah);
-        const elSection = document.getElementById(section);
-        const elFooter  = footer ? document.getElementById(footer) : null;
-
-        if (!elWadah || !elSection) return;
-
-        const kosong = elWadah.children.length === 0;
-        elSection.style.display = kosong ? 'none' : '';
-        if (elFooter) elFooter.style.display = kosong ? 'none' : '';
-
-        const prev = elSection.previousElementSibling;
-        if (prev && prev.classList.contains('divider')) {
-            prev.style.display = kosong ? 'none' : '';
-        }
-    });
-}
-
-// ═══════════════════════════════════════════════════════════
-// 5. HELPER FETCH DATA API
-// ═══════════════════════════════════════════════════════════
-async function fetchKonten(kategori, limit = 6) {
+async function fetchKonten(kategori, limit = 6, extraParams = '') {
     try {
-        const res = await fetch(`api/get_konten.php?kategori=${kategori}&limit=${limit}`);
+        const res = await fetch(`api/get_konten.php?kategori=${kategori}&limit=${limit}${extraParams}`);
         if (!res.ok) throw new Error(`Gagal fetch: ${kategori}`);
         return await res.json();
     } catch (err) {
@@ -100,74 +67,62 @@ async function fetchKonten(kategori, limit = 6) {
 }
 
 // ═══════════════════════════════════════════════════════════
-// 6. FUNGSI RENDER KOMPONEN GLOBAL (Ticker, Hero, dll)
+// 3. LOGIK PENGURUSAN SECTION KOSONG (Khusus index.html)
 // ═══════════════════════════════════════════════════════════
+function sembunyikanSectionKosong() {
+    const PETA_SECTION = [
+        { wadah: 'wadah-artikel',    section: 'artikel' },
+        { wadah: 'wadah-info-lomba', section: 'info-lomba' },
+        { wadah: 'wadah-prestasi',   section: 'prestasi' },
+        { wadah: 'wadah-pengumuman', section: 'pengumuman' },
+    ];
 
+    PETA_SECTION.forEach(({ wadah, section }) => {
+        const elWadah   = document.getElementById(wadah);
+        const elSection = document.getElementById(section);
+
+        if (elWadah && elSection) {
+            const kosong = elWadah.children.length === 0;
+            elSection.style.display = kosong ? 'none' : '';
+            
+            // Sembunyikan divider sebelumnya jika ada
+            const prev = elSection.previousElementSibling;
+            if (prev && prev.classList.contains('divider')) {
+                prev.style.display = kosong ? 'none' : '';
+            }
+        }
+    });
+}
+
+// ═══════════════════════════════════════════════════════════
+// 4. RENDER KOMPONEN GLOBAL (Ticker, Hero)
+// ═══════════════════════════════════════════════════════════
 function renderTicker(items) {
     const track = document.getElementById('ticker-track');
     const wrap  = document.getElementById('ticker-wrap');
     if (!track || !wrap || items.length === 0) return;
 
-    const semua = [...items, ...items]; // Looping mulus
+    const semua = [...items, ...items]; 
     track.innerHTML = semua.map((item, i) => `
-        <a href="${item.href}">${item.judul}</a>
+        <a href="${item.href || '#'}">${item.judul}</a>
         ${i < semua.length - 1 ? '<span class="ticker-sep">◆</span>' : ''}
     `).join('');
     wrap.style.display = '';
 }
 
-function renderHeroPreview(artikel, lomba) {
-    const heroRight = document.getElementById('hero-right');
-    const elArtikel = document.getElementById('hero-preview-artikel');
-    const elLomba   = document.getElementById('hero-preview-lomba');
-    if (!heroRight) return;
-
-    if (artikel && elArtikel) {
-        elArtikel.innerHTML = `
-            <div class="hero-preview-label">📰 Artikel Terbaru</div>
-            <div class="hero-preview-title">${artikel.judul}</div>
-            <div class="hero-preview-meta">${artikel.tanggal} · KSI Mist</div>
-        `;
-        elArtikel.onclick = () => { window.location.href = `artikel.html?id=${artikel.id}`; };
-    }
-    if (lomba && elLomba) {
-        elLomba.innerHTML = `
-            <div class="hero-preview-label">🏆 Info Lomba</div>
-            <div class="hero-preview-title">${lomba.judul}</div>
-            <div class="hero-preview-meta">${lomba.penyelenggara ?? ''}</div>
-        `;
-        elLomba.onclick = () => { window.location.href = `artikel.html?id=${lomba.id}`; };
-    }
-    heroRight.style.display = (artikel || lomba) ? '' : 'none';
-}
-
 // ═══════════════════════════════════════════════════════════
-// 7. RENDER HALAMAN ARTIKEL
+// 5. INITIALIZERS PER HALAMAN
 // ═══════════════════════════════════════════════════════════
+
+// --- HALAMAN ARTIKEL ---
 async function initHalamanArtikel() {
-    const wadahSorotan = document.getElementById('sorotan-artikel-container');
     const wadahGrid = document.getElementById('wadah-semua-artikel');
     if (!wadahGrid) return;
 
-    const data = await fetchKonten('artikel', 10);
+    const data = await fetchKonten('artikel', 12);
     if (data.length === 0) return;
 
-    if (wadahSorotan) {
-        const sorotan = data[0];
-        wadahSorotan.innerHTML = `
-            <a href="detail.html?id=${sorotan.id}&tipe=artikel" class="card fade-up" style="margin-bottom: 30px; display: block; border-bottom: 4px solid var(--primary);">
-                <div class="card-thumb" style="min-height: 400px;">
-                    <img src="${sorotan.thumbnail || 'assets/default.jpg'}" style="width:100%; height:100%; object-fit:cover;">
-                </div>
-                <div class="card-body" style="background: var(--dark); color: var(--white); padding: 24px;">
-                    <div style="color: var(--tersiary); font-size: 12px; font-weight: 700; margin-bottom: 8px;">SOROTAN UTAMA • ${sorotan.tanggal}</div>
-                    <h2 class="font-bebas" style="font-size: 32px;">${sorotan.judul}</h2>
-                </div>
-            </a>`;
-    }
-
-    const sisanya = wadahSorotan ? data.slice(1) : data;
-    wadahGrid.innerHTML = sisanya.map(item => `
+    wadahGrid.innerHTML = data.map(item => `
         <a href="detail.html?id=${item.id}&tipe=artikel" class="card fade-up">
             <div class="card-thumb" style="min-height: 200px;">
                 <img src="${item.thumbnail || 'assets/default.jpg'}" style="width:100%; height:100%; object-fit:cover;">
@@ -180,36 +135,34 @@ async function initHalamanArtikel() {
     daftarkanFadeUp();
 }
 
-// ═══════════════════════════════════════════════════════════
-// 8. RENDER HALAMAN INFO LOMBA
-// ═══════════════════════════════════════════════════════════
+// --- HALAMAN INFO LOMBA ---
 async function initHalamanLomba() {
-    const wadahGrid = document.getElementById('wadah-semua-lomba');
+    const wadahGrid = document.getElementById('wadah-info-lomba');
     if (!wadahGrid) return;
 
-    const data = await fetchKonten('info-lomba', 8);
+    const data = await fetchKonten('info-lomba', 12);
     wadahGrid.innerHTML = data.map(item => `
         <a href="detail.html?id=${item.id}&tipe=lomba" class="card fade-up" style="border-bottom: 3px solid var(--tersiary);">
             <div class="card-thumb" style="aspect-ratio: 4/5;">
                 <img src="${item.thumbnail || 'assets/default-poster.jpg'}" style="width:100%; height:100%; object-fit:cover;">
             </div>
             <div class="card-body" style="padding: 16px; text-align: center;">
-                <div class="card-tag">${item.status || 'BUKA'}</div>
-                <h3 class="card-title">${item.judul}</h3>
-                <div style="font-size: 12px; color: var(--text-light);"><i class="fas fa-clock"></i> Deadline: ${item.deadline || '-'}</div>
+                <div class="card-tag" style="background:var(--tersiary); color:var(--primary); font-size:10px; padding:2px 8px; border-radius:4px; display:inline-block; margin-bottom:8px; font-weight:700;">
+                    ${item.status || 'BUKA'}
+                </div>
+                <h3 class="card-title" style="font-size:14px;">${item.judul}</h3>
+                <div style="font-size: 11px; color: var(--text-light);"><i class="fas fa-clock"></i> Deadline: ${item.deadline || '-'}</div>
             </div>
         </a>`).join('');
     daftarkanFadeUp();
 }
 
-// ═══════════════════════════════════════════════════════════
-// 9. RENDER HALAMAN PRESTASI
-// ═══════════════════════════════════════════════════════════
+// --- HALAMAN PRESTASI ---
 async function initHalamanPrestasi() {
-    const wadahGrid = document.getElementById('wadah-semua-prestasi');
+    const wadahGrid = document.getElementById('wadah-prestasi');
     if (!wadahGrid) return;
 
-    const data = await fetchKonten('prestasi', 10);
+    const data = await fetchKonten('prestasi', 12);
     const medalMap = { '1': '🥇', '2': '🥈', '3': '🥉' };
 
     wadahGrid.innerHTML = data.map(item => `
@@ -221,16 +174,14 @@ async function initHalamanPrestasi() {
                 <div style="font-size: 11px; color: var(--primary); font-weight: 800;">
                     ${medalMap[item.peringkat] || '🏆'} JUARA ${item.peringkat} • ${item.tingkat}
                 </div>
-                <h3 class="card-title">${item.judul}</h3>
+                <h3 class="card-title" style="font-size:14px; margin-block:5px;">${item.judul}</h3>
                 <div style="font-size: 12px; color: var(--text-light);">${item.nama_pemenang || ''}</div>
             </div>
         </div>`).join('');
     daftarkanFadeUp();
 }
 
-// ═══════════════════════════════════════════════════════════
-// 10. RENDER HALAMAN DEPARTEMEN (Dinamik)
-// ═══════════════════════════════════════════════════════════
+// --- HALAMAN DAFTAR DEPARTEMEN ---
 async function initHalamanDepartemen() {
     const wadahDept = document.getElementById('wadah-departemen');
     if (!wadahDept) return;
@@ -247,27 +198,70 @@ async function initHalamanDepartemen() {
     daftarkanFadeUp();
 }
 
+// --- HALAMAN DETAIL DEPARTEMEN (ANGGOTA) ---
+async function initHalamanDetailDepartemen() {
+    const wadahPimpinan = document.getElementById('wadah-pimpinan');
+    if (!wadahPimpinan) return;
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const deptId = urlParams.get('id');
+    if (!deptId) return;
+
+    try {
+        // Render Nama & Deskripsi Dept
+        const resDept = await fetch(`api/get_konten.php?kategori=departemen_info&id=${deptId}`);
+        const info = await resDept.json();
+        if(info) {
+            document.getElementById('nama-departemen-detail').innerHTML = `${info.nama_prefix || 'Departemen'} <span>${info.nama}</span>`;
+            document.getElementById('deskripsi-departemen-detail').innerText = info.deskripsi;
+        }
+
+        // Render Anggota
+        const anggota = await fetchKonten('anggota', 50, `&dept_id=${deptId}`);
+        
+        const renderList = (targetId, sectionId, filterKey) => {
+            const target = document.getElementById(targetId);
+            const filtered = anggota.filter(m => m.kategori_jabatan === filterKey);
+            if(filtered.length > 0) {
+                target.innerHTML = filtered.map(m => `
+                    <div class="member-card fade-up">
+                        <img src="${m.foto || 'https://ui-avatars.com/api/?name='+m.nama}" class="member-photo" alt="${m.nama}">
+                        <div class="member-name">${m.nama}</div>
+                        <div class="member-role">${m.jabatan}</div>
+                    </div>
+                `).join('');
+                document.getElementById(sectionId).style.display = 'block';
+            }
+        };
+
+        renderList('wadah-pimpinan', 'section-pimpinan', 'pimpinan');
+        renderList('wadah-ahli', 'section-ahli', 'ahli');
+        renderList('wadah-staf', 'section-staf', 'staf');
+
+        daftarkanFadeUp();
+    } catch (err) { console.error(err); }
+}
+
 // ═══════════════════════════════════════════════════════════
 // 11. INITIALIZATION ORCHESTRATOR
 // ═══════════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Jalankan fungsi asas UI
+    // 1. Jalankan fungsi UI Global
     daftarkanFadeUp();
-    sembunyikanSectionKosong();
 
-    // 2. Kenali halaman dan jalankan init yang sesuai
-    const path = window.location.pathname;
+    // 2. Jalankan Ticker (Berlaku di semua halaman jika elemen ada)
+    fetchKonten('ticker', 10).then(data => renderTicker(data));
 
-    if (path.includes('artikel.html')) {
-        initHalamanArtikel();
-    } else if (path.includes('info-lomba.html')) {
-        initHalamanLomba();
-    } else if (path.includes('prestasi.html')) {
-        initHalamanPrestasi();
-    } else if (path.includes('departemen.html')) {
-        initHalamanDepartemen();
-    } else {
-        // Jika di index.html (Utama)
-        initKonten(); // Fungsi asal anda untuk muat semua preview di home
+    // 3. Jalankan Init berdasarkan deteksi elemen di halaman
+    if (document.getElementById('beranda')) {
+        // Jika di Home, jalankan orchestrator utama index.html
+        if (typeof initKonten === 'function') initKonten(); 
+        sembunyikanSectionKosong();
     }
+    
+    if (document.getElementById('wadah-semua-artikel')) initHalamanArtikel();
+    if (document.getElementById('wadah-info-lomba')) initHalamanLomba();
+    if (document.getElementById('wadah-prestasi')) initHalamanPrestasi();
+    if (document.getElementById('wadah-departemen')) initHalamanDepartemen();
+    if (document.getElementById('wadah-pimpinan')) initHalamanDetailDepartemen();
 });
