@@ -6,7 +6,7 @@
 
 'use strict';
 
-const API = 'https://web-ksimist-production.up.railway.app/api';
+const API = 'https://web-ksimist.up.railway.app/api';
 
 // ═══════════════════════════════════════════════════════════
 // UTILITY: TOAST NOTIFICATION
