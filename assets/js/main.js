@@ -207,7 +207,9 @@ async function initHalamanDetailDepartemen() {
         if (dept) {
             const elNama = document.getElementById('nama-departemen-detail');
             const elDesk = document.getElementById('deskripsi-departemen-detail');
-            if (elNama) elNama.innerHTML = `Departemen <span>${dept.nama}</span>`;
+            if (elNama) elNama.innerHTML = dept.kode === 'INTI'
+                ? `<span>${dept.nama}</span>`
+                : `Departemen <span>${dept.nama}</span>`;
             if (elDesk) elDesk.textContent = dept.deskripsi || '';
         }
 
