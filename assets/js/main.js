@@ -356,6 +356,151 @@ async function initKonten() {
     daftarkanFadeUp();
 }
 
+// ═══════════════════════════════════════════════════════════
+// 10. RENDER KHUSUS HALAMAN ARTIKEL, LOMBA, & PRESTASI
+// ═══════════════════════════════════════════════════════════
+
+// --- A. RENDER HALAMAN ARTIKEL ---
+async function initHalamanArtikel() {
+    const wadahSorotan = document.getElementById('sorotan-artikel-container');
+    const wadahGrid = document.getElementById('wadah-semua-artikel');
+    
+    // Jika elemen tidak ada di halaman, hentikan fungsi
+    if (!wadahSorotan || !wadahGrid) return;
+
+    try {
+        const data = await fetchKonten('artikel', 10); // Ambil 10 artikel
+        if (data.length === 0) return;
+
+        // Pisahkan 1 data pertama untuk sorotan besar
+        const sorotan = data[0];
+        const sisanya = data.slice(1);
+
+        // Render Sorotan Utama
+        wadahSorotan.innerHTML = `
+            <a href="detail.html?id=${sorotan.id}&tipe=artikel" class="card fade-up" style="margin-bottom: 30px; display: block; border-bottom: 4px solid var(--primary);">
+                <div class="card-thumb" style="min-height: 400px;">
+                    <img src="${sorotan.thumbnail || 'assets/default.jpg'}" alt="${sorotan.judul}" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div class="card-body" style="background: var(--dark); color: var(--white); padding: 24px;">
+                    <div style="color: var(--tersiary); font-size: 12px; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px;">
+                        SOROTAN UTAMA • ${sorotan.tanggal}
+                    </div>
+                    <h2 style="font-family: 'Bebas Neue', cursive; font-size: 32px; letter-spacing: 1px;">${sorotan.judul}</h2>
+                </div>
+            </a>
+        `;
+
+        // Render Grid Artikel 
+        wadahGrid.innerHTML = sisanya.map(item => `
+            <a href="detail.html?id=${item.id}&tipe=artikel" class="card">
+                <div class="card-thumb" style="min-height: 200px;">
+                    <img src="${item.thumbnail || 'assets/default.jpg'}" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <div class="card-body" style="padding: 16px 20px;">
+                    <div style="font-size: 12px; color: var(--text-light); font-weight: 600; margin-bottom: 6px;">${item.tanggal}</div>
+                    <h3 class="card-title" style="margin: 0; font-size: 16px;">${item.judul}</h3>
+                </div>
+            </a>
+        `).join('');
+
+        daftarkanFadeUp(); // Jalankan animasi
+    } catch (err) {
+        console.error("Gagal memuat artikel:", err);
+    }
+}
+
+// --- B. RENDER HALAMAN INFO LOMBA ---
+async function initHalamanLomba() {
+    const wadahGrid = document.getElementById('wadah-semua-lomba');
+    if (!wadahGrid) return;
+
+    try {
+        const data = await fetchKonten('info-lomba', 8);
+        if (data.length === 0) return;
+
+        // Render Grid Info Lomba (Poster Tegak)
+        wadahGrid.innerHTML = data.map(item => `
+            <a href="detail.html?id=${item.id}&tipe=lomba" class="card fade-up" style="border-bottom: 3px solid var(--tersiary);">
+                <div class="card-thumb" style="aspect-ratio: 4/5;">
+                    <img src="${item.thumbnail || 'assets/default-poster.jpg'}" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <div class="card-body" style="padding: 16px; text-align: center;">
+                    <div style="display: inline-block; background: var(--accent); color: var(--primary); font-size: 10px; font-weight: 700; padding: 4px 10px; border-radius: 4px; margin-bottom: 8px;">
+                        ${item.status || 'PENDAFTARAN BUKA'}
+                    </div>
+                    <h3 class="card-title" style="margin-bottom: 4px;">${item.judul}</h3>
+                    <div style="font-size: 12px; color: var(--text-light);">
+                        <i class="fas fa-clock"></i> Tenggat: ${item.deadline || '-'}
+                    </div>
+                </div>
+            </a>
+        `).join('');
+
+        daftarkanFadeUp();
+    } catch (err) {
+        console.error("Gagal memuat info lomba:", err);
+    }
+}
+
+// --- C. RENDER HALAMAN PRESTASI ---
+async function initHalamanPrestasi() {
+    const wadahSorotan = document.getElementById('sorotan-prestasi-container');
+    const wadahGrid = document.getElementById('wadah-semua-prestasi');
+    if (!wadahSorotan || !wadahGrid) return;
+
+    try {
+        const data = await fetchKonten('prestasi', 10);
+        if (data.length === 0) return;
+
+        const sorotan = data[0];
+        const sisanya = data.slice(1);
+
+        // Render Sorotan Prestasi (Gambar Besar dengan Overlay)
+        wadahSorotan.innerHTML = `
+            <a href="detail.html?id=${sorotan.id}&tipe=prestasi" class="card fade-up" style="margin-bottom: 30px; display: block; position: relative; border: none;">
+                <div class="card-thumb" style="min-height: 450px;">
+                    <img src="${sorotan.thumbnail || 'assets/default.jpg'}" style="width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6);">
+                </div>
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; padding: 40px; background: linear-gradient(transparent, var(--dark)); color: var(--white);">
+                    <div style="color: var(--tersiary); font-size: 14px; font-weight: 800; margin-bottom: 8px;">
+                        <i class="fas fa-trophy"></i> JUARA ${sorotan.peringkat || '1'} TINGKAT ${sorotan.tingkat || 'NASIONAL'}
+                    </div>
+                    <h2 style="font-family: 'Bebas Neue', cursive; font-size: 40px; letter-spacing: 1px; margin-bottom: 4px;">${sorotan.judul}</h2>
+                    <p style="font-size: 15px; color: var(--secondary);">Diraih oleh: ${sorotan.nama_pemenang || 'Tim KSI Mist'}</p>
+                </div>
+            </a>
+        `;
+
+        // Render Grid Prestasi
+        wadahGrid.innerHTML = sisanya.map(item => `
+            <a href="detail.html?id=${item.id}&tipe=prestasi" class="card fade-up">
+                <div class="card-thumb" style="min-height: 250px;">
+                    <img src="${item.thumbnail || 'assets/default.jpg'}" style="width:100%; height:100%; object-fit:cover;">
+                </div>
+                <div class="card-body" style="padding: 16px 20px; border-top: 4px solid var(--primary);">
+                    <div style="font-size: 11px; color: var(--primary); font-weight: 800; margin-bottom: 4px;">
+                        JUARA ${item.peringkat} • ${item.tingkat}
+                    </div>
+                    <h3 class="card-title" style="margin-bottom: 4px; font-size: 16px;">${item.judul}</h3>
+                    <div style="font-size: 12px; color: var(--text-light);">${item.nama_pemenang || ''}</div>
+                </div>
+            </a>
+        `).join('');
+
+        daftarkanFadeUp();
+    } catch (err) {
+        console.error("Gagal memuat prestasi:", err);
+    }
+}
+
+// Panggil fungsi saat halaman selesai dimuat (DOM Ready)
+document.addEventListener('DOMContentLoaded', () => {
+    initHalamanArtikel();
+    initHalamanLomba();
+    initHalamanPrestasi();
+});
+
 
 // ═══════════════════════════════════════════════════════════
 // INISIALISASI
@@ -369,3 +514,4 @@ document.addEventListener('DOMContentLoaded', () => {
     // Aktifkan setelah backend PHP siap:
     // initKonten();
 });
+
