@@ -176,7 +176,7 @@ async function initHalamanDepartemen() {
         const data = await res.json();
 
         // Sembunyikan Pengurus Inti dari grid departemen publik
-        const publik = data.filter(d => d.kode !== 'INTI');
+        const publik = data;
 
         wadah.innerHTML = publik.map(dept => `
             <a href="detail-departemen.html?id=${dept.id}" class="card fade-up" style="padding:40px 20px;text-align:center;border-bottom:4px solid ${dept.warna};">
