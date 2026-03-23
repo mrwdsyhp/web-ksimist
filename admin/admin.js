@@ -7,6 +7,30 @@
 
 'use strict';
 
+// ═══════════════════════════════════════════════════════════
+// AUTH GUARD — Cek token sebelum halaman tampil
+// ═══════════════════════════════════════════════════════════
+(function authGuard() {
+    const token = sessionStorage.getItem('ksi_token') || localStorage.getItem('ksi_token');
+    if (!token) {
+        window.location.replace('./login.html');
+    }
+})();
+
+// ── HELPER: Ambil token untuk request API ─────────────────
+function getToken() {
+    return sessionStorage.getItem('ksi_token') || localStorage.getItem('ksi_token') || '';
+}
+
+// ── HELPER: Logout ────────────────────────────────────────
+function logout() {
+    sessionStorage.removeItem('ksi_token');
+    sessionStorage.removeItem('ksi_user');
+    localStorage.removeItem('ksi_token');
+    localStorage.removeItem('ksi_user');
+    window.location.replace('./login.html');
+}
+
 const API = 'https://web-ksimist.up.railway.app/api';
 
 // ═══════════════════════════════════════════════════════════
@@ -363,7 +387,7 @@ document.getElementById('form-konten').onsubmit = async (e) => {
     try {
         const url    = id ? `${API}/konten/${id}` : `${API}/konten`;
         const method = id ? 'PUT' : 'POST';
-        const res    = await fetch(url, { method, body: fd });
+        const res    = await fetch(url, { method, body: fd, headers: { 'Authorization': `Bearer ${getToken()}` } });
         const result = await res.json();
         if (!res.ok) throw new Error(result.error);
         toast(result.message);
@@ -529,7 +553,7 @@ document.getElementById('form-pengurus').onsubmit = async (e) => {
     try {
         const url    = id ? `${API}/pengurus/${id}` : `${API}/pengurus`;
         const method = id ? 'PUT' : 'POST';
-        const res    = await fetch(url, { method, body: fd });
+        const res    = await fetch(url, { method, body: fd, headers: { 'Authorization': `Bearer ${getToken()}` } });
         const result = await res.json();
         if (!res.ok) throw new Error(result.error);
         toast(result.message);

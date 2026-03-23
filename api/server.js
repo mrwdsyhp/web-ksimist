@@ -23,7 +23,12 @@ const cors    = require('cors');
 const multer  = require('multer');
 const path    = require('path');
 const fs      = require('fs');
+const bcrypt  = require('bcryptjs');
+const jwt     = require('jsonwebtoken');
 require('dotenv').config();
+
+const JWT_SECRET  = process.env.JWT_SECRET  || 'ksi-mist-secret-key-ganti-di-env';
+const JWT_EXPIRES = process.env.JWT_EXPIRES || '8h';
 
 const app = express();
 
@@ -175,14 +180,181 @@ async function initTabel() {
         console.log('✅ Seed data departemen selesai!');
     }
 
+    // Tabel admin (akun login dashboard)
+    await db.query(`
+        CREATE TABLE IF NOT EXISTS \`admin_user\` (
+            \`id\`         INT AUTO_INCREMENT PRIMARY KEY,
+            \`username\`   VARCHAR(80)  NOT NULL UNIQUE,
+            \`email\`      VARCHAR(150) NOT NULL UNIQUE,
+            \`password\`   VARCHAR(255) NOT NULL,
+            \`nama\`       VARCHAR(150) NOT NULL,
+            \`role\`       ENUM('superadmin','admin') NOT NULL DEFAULT 'admin',
+            \`aktif\`      TINYINT(1)   NOT NULL DEFAULT 1,
+            \`created_at\` TIMESTAMP    DEFAULT CURRENT_TIMESTAMP,
+            \`last_login\` TIMESTAMP    NULL DEFAULT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `);
+
     console.log('✅ Semua tabel siap!');
 }
+
+// ─── Middleware: Verifikasi JWT ───────────────────────────
+function authMiddleware(req, res, next) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.startsWith('Bearer ')
+        ? authHeader.slice(7)
+        : null;
+
+    if (!token) {
+        return res.status(401).json({ error: 'Akses ditolak. Token tidak ditemukan.' });
+    }
+
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.admin = decoded;
+        next();
+    } catch (err) {
+        return res.status(401).json({ error: 'Token tidak valid atau sudah kedaluwarsa.' });
+    }
+}
+
+// ─── Middleware: Hanya superadmin ─────────────────────────
+function superAdminOnly(req, res, next) {
+    if (req.admin?.role !== 'superadmin') {
+        return res.status(403).json({ error: 'Hanya superadmin yang dapat melakukan ini.' });
+    }
+    next();
+}
+
+
+// ═══════════════════════════════════════════════════════════
+// API: AUTENTIKASI
+// ═══════════════════════════════════════════════════════════
+
+// ── LOGIN ─────────────────────────────────────────────────
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username dan password wajib diisi!' });
+        }
+
+        // Cari user (bisa pakai username atau email)
+        const rows = await q(
+            'SELECT * FROM admin_user WHERE (username = ? OR email = ?) AND aktif = 1',
+            [username, username]
+        );
+
+        if (rows.length === 0) {
+            return res.status(401).json({ error: 'Username atau password salah.' });
+        }
+
+        const admin = rows[0];
+
+        // Cek password
+        const passwordMatch = await bcrypt.compare(password, admin.password);
+        if (!passwordMatch) {
+            return res.status(401).json({ error: 'Username atau password salah.' });
+        }
+
+        // Update last_login
+        await db.query('UPDATE admin_user SET last_login = NOW() WHERE id = ?', [admin.id]);
+
+        // Buat JWT token
+        const token = jwt.sign(
+            { id: admin.id, username: admin.username, nama: admin.nama, role: admin.role },
+            JWT_SECRET,
+            { expiresIn: JWT_EXPIRES }
+        );
+
+        res.json({
+            message: '✅ Login berhasil!',
+            token,
+            user: {
+                id:       admin.id,
+                username: admin.username,
+                nama:     admin.nama,
+                email:    admin.email,
+                role:     admin.role,
+            }
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── CEK TOKEN (untuk validasi di frontend) ─────────────────
+app.get('/api/auth/me', authMiddleware, async (req, res) => {
+    try {
+        const rows = await q(
+            'SELECT id, username, nama, email, role, last_login FROM admin_user WHERE id = ?',
+            [req.admin.id]
+        );
+        if (!rows[0]) return res.status(404).json({ error: 'Admin tidak ditemukan.' });
+        res.json(rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── GANTI PASSWORD ─────────────────────────────────────────
+app.put('/api/auth/password', authMiddleware, async (req, res) => {
+    try {
+        const { password_lama, password_baru } = req.body;
+        if (!password_lama || !password_baru) {
+            return res.status(400).json({ error: 'Password lama dan baru wajib diisi!' });
+        }
+        if (password_baru.length < 6) {
+            return res.status(400).json({ error: 'Password baru minimal 6 karakter!' });
+        }
+
+        const rows = await q('SELECT * FROM admin_user WHERE id = ?', [req.admin.id]);
+        const match = await bcrypt.compare(password_lama, rows[0].password);
+        if (!match) return res.status(401).json({ error: 'Password lama salah!' });
+
+        const hashed = await bcrypt.hash(password_baru, 12);
+        await db.query('UPDATE admin_user SET password = ? WHERE id = ?', [hashed, req.admin.id]);
+        res.json({ message: '✅ Password berhasil diubah!' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── LIST ADMIN (superadmin only) ───────────────────────────
+app.get('/api/auth/admins', authMiddleware, superAdminOnly, async (req, res) => {
+    try {
+        const rows = await q(
+            'SELECT id, username, nama, email, role, aktif, created_at, last_login FROM admin_user ORDER BY created_at ASC'
+        );
+        res.json(rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ── NONAKTIFKAN ADMIN (superadmin only) ────────────────────
+app.patch('/api/auth/admins/:id/toggle', authMiddleware, superAdminOnly, async (req, res) => {
+    try {
+        if (parseInt(req.params.id) === req.admin.id) {
+            return res.status(400).json({ error: 'Tidak dapat menonaktifkan akun sendiri!' });
+        }
+        const rows = await q('SELECT aktif FROM admin_user WHERE id = ?', [req.params.id]);
+        if (!rows[0]) return res.status(404).json({ error: 'Admin tidak ditemukan.' });
+
+        const newStatus = rows[0].aktif ? 0 : 1;
+        await db.query('UPDATE admin_user SET aktif = ? WHERE id = ?', [newStatus, req.params.id]);
+        res.json({ message: newStatus ? '✅ Akun diaktifkan!' : '🔒 Akun dinonaktifkan!' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 
 // ═══════════════════════════════════════════════════════════
 // API: STATISTIK DASHBOARD
 // ═══════════════════════════════════════════════════════════
-app.get('/api/stats', async (req, res) => {
+app.get('/api/stats', authMiddleware, async (req, res) => {
     try {
         const [[artikel]]   = await db.query("SELECT COUNT(*) as c FROM konten WHERE kategori = 'artikel'");
         const [[lomba]]     = await db.query("SELECT COUNT(*) as c FROM konten WHERE kategori = 'info-lomba'");
@@ -246,7 +418,7 @@ app.get('/api/konten/:id', async (req, res) => {
     }
 });
 
-app.post('/api/konten', upload.single('thumbnail'), async (req, res) => {
+app.post('/api/konten', authMiddleware, upload.single('thumbnail'), async (req, res) => {
     try {
         const { kategori, judul, tanggal, isi, jenis, jenis_artikel, tingkat,
                 peringkat, link_daftar, deadline, tingkat_prestasi, nama_kompetisi, anggota_tim } = req.body;
@@ -270,7 +442,7 @@ app.post('/api/konten', upload.single('thumbnail'), async (req, res) => {
     }
 });
 
-app.put('/api/konten/:id', upload.single('thumbnail'), async (req, res) => {
+app.put('/api/konten/:id', authMiddleware, upload.single('thumbnail'), async (req, res) => {
     try {
         const { judul, tanggal, isi, jenis, jenis_artikel, tingkat,
                 peringkat, link_daftar, deadline, tingkat_prestasi, nama_kompetisi, anggota_tim } = req.body;
@@ -306,7 +478,7 @@ app.put('/api/konten/:id', upload.single('thumbnail'), async (req, res) => {
     }
 });
 
-app.delete('/api/konten/:id', async (req, res) => {
+app.delete('/api/konten/:id', authMiddleware, async (req, res) => {
     try {
         const rows = await q('SELECT thumbnail FROM konten WHERE id = ?', [req.params.id]);
         if (!rows[0]) return res.status(404).json({ error: 'Tidak ditemukan' });
@@ -345,7 +517,7 @@ app.get('/api/departemen/:id', async (req, res) => {
     }
 });
 
-app.put('/api/departemen/:id', async (req, res) => {
+app.put('/api/departemen/:id', authMiddleware, async (req, res) => {
     try {
         const { nama, slogan, deskripsi, ikon, warna } = req.body;
         await db.query(
@@ -396,7 +568,7 @@ app.get('/api/pengurus', async (req, res) => {
     }
 });
 
-app.post('/api/pengurus', upload.single('foto'), async (req, res) => {
+app.post('/api/pengurus', authMiddleware, upload.single('foto'), async (req, res) => {
     try {
         const { nama, jabatan, jabatan_level, dept_id, angkatan, prodi, urutan } = req.body;
         if (!nama || !jabatan) return res.status(400).json({ error: 'Nama dan jabatan wajib diisi!' });
@@ -414,7 +586,7 @@ app.post('/api/pengurus', upload.single('foto'), async (req, res) => {
     }
 });
 
-app.put('/api/pengurus/:id', upload.single('foto'), async (req, res) => {
+app.put('/api/pengurus/:id', authMiddleware, upload.single('foto'), async (req, res) => {
     try {
         const { nama, jabatan, jabatan_level, dept_id, angkatan, prodi, urutan } = req.body;
         const rows = await q('SELECT * FROM pengurus WHERE id = ?', [req.params.id]);
@@ -443,7 +615,7 @@ app.put('/api/pengurus/:id', upload.single('foto'), async (req, res) => {
     }
 });
 
-app.delete('/api/pengurus/:id', async (req, res) => {
+app.delete('/api/pengurus/:id', authMiddleware, async (req, res) => {
     try {
         const rows = await q('SELECT foto FROM pengurus WHERE id = ?', [req.params.id]);
         if (!rows[0]) return res.status(404).json({ error: 'Tidak ditemukan' });
@@ -478,7 +650,7 @@ app.post('/api/pesan', async (req, res) => {
     }
 });
 
-app.get('/api/pesan', async (req, res) => {
+app.get('/api/pesan', authMiddleware, async (req, res) => {
     try {
         const rows = await q('SELECT * FROM pesan ORDER BY tanggal DESC');
         res.json(rows);
@@ -487,7 +659,7 @@ app.get('/api/pesan', async (req, res) => {
     }
 });
 
-app.patch('/api/pesan/:id/baca', async (req, res) => {
+app.patch('/api/pesan/:id/baca', authMiddleware, async (req, res) => {
     try {
         await db.query('UPDATE pesan SET sudah_dibaca = 1 WHERE id = ?', [req.params.id]);
         res.json({ message: 'Ditandai sudah dibaca' });
@@ -496,7 +668,7 @@ app.patch('/api/pesan/:id/baca', async (req, res) => {
     }
 });
 
-app.delete('/api/pesan/:id', async (req, res) => {
+app.delete('/api/pesan/:id', authMiddleware, async (req, res) => {
     try {
         await db.query('DELETE FROM pesan WHERE id = ?', [req.params.id]);
         res.json({ message: '🗑️ Pesan dihapus!' });
