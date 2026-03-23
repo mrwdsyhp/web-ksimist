@@ -41,7 +41,8 @@ app.use(express.urlencoded({ extended: true }));
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 app.use('/uploads', express.static(uploadDir));
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname)));       // serve folder /api/
+app.use(express.static(path.join(__dirname, '..'))); // serve folder root (index.html, admin/, dll)
 
 // ─── Koneksi MySQL ────────────────────────────────────────
 let db;
