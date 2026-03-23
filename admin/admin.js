@@ -415,7 +415,10 @@ async function editKonten(id, kat) {
 
 async function hapusKonten(id, kat) {
     if (!confirm('Yakin ingin menghapus konten ini?')) return;
-    const res = await fetch(`${API}/konten/${id}`, { method: 'DELETE' }).catch(() => null);
+    const res = await fetch(`${API}/konten/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+    }).catch(() => null);
     if (res?.ok) { toast('Data berhasil dihapus!'); loadKonten(kat); loadStats(); }
     else toast('Gagal menghapus', 'error');
 }
@@ -581,7 +584,10 @@ async function editPengurus(id) {
 
 async function hapusPengurus(id) {
     if (!confirm('Yakin hapus pengurus ini?')) return;
-    const res = await fetch(`${API}/pengurus/${id}`, { method: 'DELETE' }).catch(() => null);
+    const res = await fetch(`${API}/pengurus/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+    }).catch(() => null);
     if (res?.ok) { toast('Pengurus dihapus!'); loadPengurus(); loadStats(); }
     else toast('Gagal menghapus', 'error');
 }
