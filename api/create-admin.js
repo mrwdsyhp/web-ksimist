@@ -1,22 +1,10 @@
-/**
- * create-admin.js — KSI Mist FMIPA UNY
- * Script CLI untuk membuat akun admin baru
- * ─────────────────────────────────────────────────────────
- * Cara pakai:
- *   node create-admin.js
- *
- * Jalankan HANYA di server/terminal, bukan lewat browser.
- * ─────────────────────────────────────────────────────────
- */
-
 'use strict';
 
-const mysql   = require('mysql2/promise');
-const bcrypt  = require('bcryptjs');
+const mysql    = require('mysql2/promise');
+const bcrypt   = require('bcryptjs');
 const readline = require('readline');
 require('dotenv').config();
 
-// ── Koneksi DB (sama persis dengan server.js) ─────────────
 async function connectDB() {
     if (process.env.DATABASE_URL) {
         return mysql.createPool(process.env.DATABASE_URL + '?ssl={"rejectUnauthorized":false}');
@@ -30,43 +18,10 @@ async function connectDB() {
     });
 }
 
-// ── Helper: tanya input di terminal ──────────────────────
-function tanya(rl, pertanyaan, hidden = false) {
-    return new Promise(resolve => {
-        if (hidden && process.stdin.isTTY) {
-            // Sembunyikan input password di terminal
-            process.stdout.write(pertanyaan);
-            process.stdin.setRawMode(true);
-            process.stdin.resume();
-            let input = '';
-            process.stdin.on('data', function onData(ch) {
-                ch = ch.toString();
-                if (ch === '\n' || ch === '\r' || ch === '\u0003') {
-                    process.stdin.setRawMode(false);
-                    process.stdin.pause();
-                    process.stdin.removeListener('data', onData);
-                    process.stdout.write('\n');
-                    resolve(input);
-                } else if (ch === '\u007f') {
-                    // Backspace
-                    if (input.length > 0) {
-                        input = input.slice(0, -1);
-                        process.stdout.clearLine(0);
-                        process.stdout.cursorTo(0);
-                        process.stdout.write(pertanyaan + '*'.repeat(input.length));
-                    }
-                } else {
-                    input += ch;
-                    process.stdout.write('*');
-                }
-            });
-        } else {
-            rl.question(pertanyaan, resolve);
-        }
-    });
+function tanya(rl, pertanyaan) {
+    return new Promise(resolve => rl.question(pertanyaan, resolve));
 }
 
-// ── Main ──────────────────────────────────────────────────
 (async () => {
     console.log('\n╔══════════════════════════════════════════╗');
     console.log('║   KSI Mist — Buat Akun Admin Baru       ║');
@@ -82,13 +37,9 @@ function tanya(rl, pertanyaan, hidden = false) {
         process.exit(1);
     }
 
-    const rl = readline.createInterface({
-        input:  process.stdin,
-        output: process.stdout,
-    });
+    const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
 
     try {
-        // Cek jumlah admin yang sudah ada
         const [[{ total }]] = await db.query('SELECT COUNT(*) as total FROM admin_user');
         const isFirst = parseInt(total) === 0;
 
@@ -98,16 +49,15 @@ function tanya(rl, pertanyaan, hidden = false) {
             console.log(`ℹ️  Sudah ada ${total} akun admin. Akun baru akan berperan sebagai ADMIN.\n`);
         }
 
-        // Input data
-        const nama     = (await tanya(rl, '📝 Nama Lengkap   : ')).trim();
-        const username = (await tanya(rl, '👤 Username       : ')).trim();
-        const email    = (await tanya(rl, '📧 Email          : ')).trim();
-        const password = (await tanya(rl, '🔒 Password       : ', true)).trim();
-        const konfirm  = (await tanya(rl, '🔒 Konfirmasi     : ', true)).trim();
+        const nama     = (await tanya(rl, 'Nama Lengkap   : ')).trim();
+        const username = (await tanya(rl, 'Username       : ')).trim();
+        const email    = (await tanya(rl, 'Email          : ')).trim();
+        const password = (await tanya(rl, 'Password       : ')).trim();
+        const konfirm  = (await tanya(rl, 'Konfirmasi     : ')).trim();
 
         let role = 'admin';
         if (!isFirst) {
-            const pilihanRole = (await tanya(rl, '🔑 Role [admin/superadmin] (default: admin) : ')).trim().toLowerCase();
+            const pilihanRole = (await tanya(rl, 'Role [admin/superadmin] (default: admin) : ')).trim().toLowerCase();
             if (pilihanRole === 'superadmin') role = 'superadmin';
         } else {
             role = 'superadmin';
@@ -115,7 +65,6 @@ function tanya(rl, pertanyaan, hidden = false) {
 
         rl.close();
 
-        // Validasi
         const errors = [];
         if (!nama)     errors.push('Nama tidak boleh kosong');
         if (!username) errors.push('Username tidak boleh kosong');
@@ -130,7 +79,6 @@ function tanya(rl, pertanyaan, hidden = false) {
             process.exit(1);
         }
 
-        // Cek duplikat
         const [existing] = await db.query(
             'SELECT id FROM admin_user WHERE username = ? OR email = ?',
             [username, email]
@@ -140,7 +88,6 @@ function tanya(rl, pertanyaan, hidden = false) {
             process.exit(1);
         }
 
-        // Hash & simpan
         console.log('\n⏳ Membuat akun...');
         const hashedPassword = await bcrypt.hash(password, 12);
         const [result] = await db.query(
