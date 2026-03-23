@@ -209,7 +209,9 @@ async function loadKonten(kat, jenis = '', tingkat = '') {
         <span class="spinner" style="border-color:rgba(255,255,255,0.1);border-top-color:#8B1A1A;"></span>
     </td></tr>`;
 
-    let url = `${API}/konten?kategori=${kat}&limit=50`;
+    const kategoriMap = { artikel: 'artikel', lomba: 'info-lomba', prestasi: 'prestasi' };
+    const katDB = kategoriMap[kat] || kat;
+    let url = `${API}/konten?kategori=${katDB}&limit=50`;
     if (jenis)   url += `&jenis=${encodeURIComponent(jenis)}`;
     if (tingkat) url += `&tingkat_prestasi=${encodeURIComponent(tingkat)}`;
 
@@ -360,8 +362,9 @@ document.getElementById('form-konten').onsubmit = async (e) => {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Menyimpan...';
 
+    const kategoriMap = { artikel: 'artikel', lomba: 'info-lomba', prestasi: 'prestasi' };
     const fd = new FormData();
-    fd.append('kategori', kat);
+    fd.append('kategori', kategoriMap[kat] || kat);
     fd.append('judul',    document.getElementById('fk-judul').value);
     fd.append('tanggal',  document.getElementById('fk-tanggal').value);
     fd.append('isi',      document.getElementById('fk-isi').value);
