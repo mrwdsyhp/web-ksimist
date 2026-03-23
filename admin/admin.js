@@ -1,6 +1,7 @@
 /**
  * admin.js — KSI Mist FMIPA UNY
  * Dashboard Admin JavaScript
+ * Migrated to Tailwind CSS + Flowbite template
  * ─────────────────────────────────────────────────────────
  */
 
@@ -14,21 +15,33 @@ const API = 'https://web-ksimist.up.railway.app/api';
 function toast(msg, type = 'success', duration = 3200) {
     const el = document.getElementById('toast');
     el.textContent = msg;
-    el.className = `show ${type}`;
+    el.className = `fixed bottom-6 right-6 z-[9999] px-5 py-3.5 rounded-xl text-sm font-semibold text-white
+        shadow-2xl max-w-sm transition-all duration-300 show ${type}`;
     clearTimeout(el._t);
-    el._t = setTimeout(() => { el.className = type; }, duration);
+    el._t = setTimeout(() => {
+        el.classList.remove('show');
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+    }, duration);
 }
+
 
 // ═══════════════════════════════════════════════════════════
 // UTILITY: MODAL
 // ═══════════════════════════════════════════════════════════
 function openModal(id, extra) {
     if (id === 'modal-konten') prepKontenModal(extra);
-    document.getElementById(id).classList.add('open');
+    const el = document.getElementById(id);
+    el.classList.remove('hidden');
+    el.classList.add('flex');
+    document.body.style.overflow = 'hidden';
 }
 
 function closeModal(id) {
-    document.getElementById(id).classList.remove('open');
+    const el = document.getElementById(id);
+    el.classList.add('hidden');
+    el.classList.remove('flex');
+    document.body.style.overflow = '';
     if (id === 'modal-konten') {
         document.getElementById('form-konten').reset();
         document.getElementById('fk-id').value = '';
@@ -46,6 +59,42 @@ document.querySelectorAll('.modal-overlay').forEach(m => {
     });
 });
 
+// Tutup modal dengan tombol Escape
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay:not(.hidden)').forEach(m => closeModal(m.id));
+    }
+});
+
+
+// ═══════════════════════════════════════════════════════════
+// SIDEBAR MOBILE TOGGLE
+// ═══════════════════════════════════════════════════════════
+(function initMobileSidebar() {
+    const toggleBtn = document.getElementById('sidebar-toggle-mobile');
+    const sidebar   = document.getElementById('sidebar');
+    if (!toggleBtn || !sidebar) return;
+
+    // Buat overlay jika belum ada
+    let overlay = document.getElementById('sidebar-overlay');
+    if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'sidebar-overlay';
+        document.body.appendChild(overlay);
+    }
+
+    toggleBtn.addEventListener('click', () => {
+        sidebar.classList.toggle('-translate-x-full');
+        overlay.classList.toggle('open');
+    });
+
+    overlay.addEventListener('click', () => {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.remove('open');
+    });
+})();
+
+
 // ═══════════════════════════════════════════════════════════
 // TAB NAVIGATION
 // ═══════════════════════════════════════════════════════════
@@ -59,14 +108,22 @@ const tabMeta = {
 };
 
 function switchTab(tab) {
+    // Sembunyikan semua tab view
     document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+
+    // Reset semua nav item
     document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
 
-    document.getElementById(`view-${tab}`).classList.add('active');
+    // Aktifkan tab yang dipilih
+    const view = document.getElementById(`view-${tab}`);
+    if (view) view.classList.add('active');
+
+    // Aktifkan nav item yang sesuai
     document.querySelectorAll('.nav-item').forEach(n => {
-        if (n.getAttribute('onclick')?.includes(`'${tab}'`)) n.classList.add('active');
+        if (n.dataset.tab === tab) n.classList.add('active');
     });
 
+    // Update header
     const m = tabMeta[tab] || {};
     document.getElementById('page-title').textContent = m.title || tab;
     document.getElementById('page-sub').textContent   = m.sub   || '';
@@ -77,7 +134,16 @@ function switchTab(tab) {
     if (tab === 'prestasi') loadKonten('prestasi');
     if (tab === 'pengurus') loadPengurus();
     if (tab === 'beranda')  loadStats();
+
+    // Tutup sidebar di mobile setelah navigasi
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+    if (sidebar && window.innerWidth < 640) {
+        sidebar.classList.add('-translate-x-full');
+        overlay?.classList.remove('open');
+    }
 }
+
 
 // ═══════════════════════════════════════════════════════════
 // STATISTIK DASHBOARD
@@ -93,8 +159,8 @@ async function loadStats() {
         document.getElementById('stat-pesan').textContent    = d.pesanBaru ?? 0;
         if (d.pesanBaru > 0) {
             const b = document.getElementById('badge-pesan');
-            b.textContent    = d.pesanBaru;
-            b.style.display  = 'inline';
+            b.textContent = d.pesanBaru;
+            b.classList.remove('hidden');
         }
     } catch { /* server belum aktif */ }
 }
@@ -113,8 +179,9 @@ async function loadKonten(kat, jenis = '', tingkat = '') {
     const tbody   = document.getElementById(tbodyId);
     if (!tbody) return;
 
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--muted)">
-        <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:var(--primary)"></span>
+    const colSpan = kat === 'artikel' ? 5 : 6;
+    tbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center py-10 text-gray-500">
+        <span class="spinner" style="border-color:rgba(255,255,255,0.1);border-top-color:#8B1A1A;"></span>
     </td></tr>`;
 
     let url = `${API}/konten?kategori=${kat}&limit=50`;
@@ -124,8 +191,9 @@ async function loadKonten(kat, jenis = '', tingkat = '') {
     const data = await fetch(url).then(r => r.json()).catch(() => []);
 
     if (!data.length) {
-        tbody.innerHTML = `<tr><td colspan="6">
-            <div class="empty"><i class="fas fa-inbox"></i><p>Belum ada data.</p></div>
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="text-center py-14 text-gray-500">
+            <i class="fas fa-inbox text-4xl mb-3 block opacity-30"></i>
+            <p class="text-sm">Belum ada data.</p>
         </td></tr>`;
         return;
     }
@@ -141,20 +209,24 @@ async function loadKonten(kat, jenis = '', tingkat = '') {
             src="${item.thumbnail_url || 'https://placehold.co/50x50/1A1F3A/FDF3C0?text=KSI'}"
             onerror="this.src='https://placehold.co/50x50/1A1F3A/FDF3C0?text=KSI'">`;
         const aksi = `<div class="action-btns">
-            <button class="btn btn-ghost btn-sm" onclick="editKonten(${item.id},'${kat}')"><i class="fas fa-pen"></i></button>
-            <button class="btn btn-danger btn-sm" onclick="hapusKonten(${item.id},'${kat}')"><i class="fas fa-trash"></i></button>
+            <button class="btn-ghost btn-sm" onclick="editKonten(${item.id},'${kat}')">
+                <i class="fas fa-pen"></i>
+            </button>
+            <button class="btn-danger" onclick="hapusKonten(${item.id},'${kat}')">
+                <i class="fas fa-trash"></i>
+            </button>
         </div>`;
-        const tgl  = item.tanggal
+        const tgl = item.tanggal
             ? new Date(item.tanggal).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
             : '—';
 
         if (kat === 'artikel') {
-            return `<tr>
-                <td>${img}</td>
-                <td><div class="td-title">${item.judul}</div></td>
-                <td><span class="chip chip-blue">${item.jenis_artikel || 'Lainnya'}</span></td>
-                <td class="td-muted">${tgl}</td>
-                <td>${aksi}</td>
+            return `<tr class="transition-colors">
+                <td class="px-4 py-3">${img}</td>
+                <td class="px-4 py-3"><div class="td-title">${item.judul}</div></td>
+                <td class="px-4 py-3"><span class="chip chip-blue">${item.jenis_artikel || 'Lainnya'}</span></td>
+                <td class="px-4 py-3 td-muted">${tgl}</td>
+                <td class="px-4 py-3">${aksi}</td>
             </tr>`;
         }
 
@@ -163,33 +235,33 @@ async function loadKonten(kat, jenis = '', tingkat = '') {
                 ? new Date(item.deadline).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })
                 : '—';
             const past = item.deadline && new Date(item.deadline) < new Date();
-            return `<tr>
-                <td>${img}</td>
-                <td>
+            return `<tr class="transition-colors">
+                <td class="px-4 py-3">${img}</td>
+                <td class="px-4 py-3">
                     <div class="td-title">${item.judul}</div>
-                    ${item.link_daftar ? `<a href="${item.link_daftar}" target="_blank" style="font-size:11px;color:var(--primary)">Link Daftar ↗</a>` : ''}
+                    ${item.link_daftar ? `<a href="${item.link_daftar}" target="_blank" class="text-xs text-primary-400 hover:text-primary-300 mt-0.5 inline-block">Link Daftar ↗</a>` : ''}
                 </td>
-                <td><span class="chip ${jenisChip[item.jenis] || 'chip-gray'}">${item.jenis || '—'}</span></td>
-                <td><span class="chip chip-blue">${item.tingkat || '—'}</span></td>
-                <td><span class="chip ${past ? 'chip-gray' : 'chip-green'}">${ddl}</span></td>
-                <td>${aksi}</td>
+                <td class="px-4 py-3"><span class="chip ${jenisChip[item.jenis] || 'chip-gray'}">${item.jenis || '—'}</span></td>
+                <td class="px-4 py-3"><span class="chip chip-blue">${item.tingkat || '—'}</span></td>
+                <td class="px-4 py-3"><span class="chip ${past ? 'chip-gray' : 'chip-green'}">${ddl}</span></td>
+                <td class="px-4 py-3">${aksi}</td>
             </tr>`;
         }
 
         if (kat === 'prestasi') {
-            return `<tr>
-                <td>${img}</td>
-                <td>
+            return `<tr class="transition-colors">
+                <td class="px-4 py-3">${img}</td>
+                <td class="px-4 py-3">
                     <div class="td-title">${item.judul}</div>
                     <div class="td-muted">${item.nama_kompetisi || ''}</div>
                 </td>
-                <td style="font-size:18px">
+                <td class="px-4 py-3 text-lg">
                     ${medalMap[item.peringkat] || '🏆'}
-                    <span style="font-size:12px;font-weight:700">${item.peringkat || '—'}</span>
+                    <span class="text-xs font-bold text-gray-300 ml-1">${item.peringkat || '—'}</span>
                 </td>
-                <td><span class="chip chip-gold">${item.tingkat_prestasi || '—'}</span></td>
-                <td class="td-muted">${tgl}</td>
-                <td>${aksi}</td>
+                <td class="px-4 py-3"><span class="chip chip-gold">${item.tingkat_prestasi || '—'}</span></td>
+                <td class="px-4 py-3 td-muted">${tgl}</td>
+                <td class="px-4 py-3">${aksi}</td>
             </tr>`;
         }
     }).join('');
@@ -240,16 +312,16 @@ function prepKontenModal(kat, data = null) {
             document.getElementById('fk-jenis-artikel').value = data.jenis_artikel || '';
         }
         if (isLomba) {
-            document.getElementById('fk-jenis').value   = data.jenis         || '';
-            document.getElementById('fk-tingkat').value = data.tingkat       || '';
-            document.getElementById('fk-link').value    = data.link_daftar   || '';
+            document.getElementById('fk-jenis').value   = data.jenis       || '';
+            document.getElementById('fk-tingkat').value = data.tingkat     || '';
+            document.getElementById('fk-link').value    = data.link_daftar || '';
             if (data.deadline) document.getElementById('fk-deadline').value = data.deadline.split('T')[0];
         }
         if (isPrestasi) {
-            document.getElementById('fk-peringkat').value        = data.peringkat         || '';
-            document.getElementById('fk-tingkat-prestasi').value = data.tingkat_prestasi  || '';
-            document.getElementById('fk-nama-kompetisi').value   = data.nama_kompetisi    || '';
-            document.getElementById('fk-anggota-tim').value      = data.anggota_tim       || '';
+            document.getElementById('fk-peringkat').value        = data.peringkat        || '';
+            document.getElementById('fk-tingkat-prestasi').value = data.tingkat_prestasi || '';
+            document.getElementById('fk-nama-kompetisi').value   = data.nama_kompetisi   || '';
+            document.getElementById('fk-anggota-tim').value      = data.anggota_tim      || '';
         }
     }
 }
@@ -339,8 +411,8 @@ async function loadDeptOptions() {
 async function loadPengurus() {
     await loadDeptOptions();
     const wadah = document.getElementById('wadah-pengurus');
-    wadah.innerHTML = `<div class="empty">
-        <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:var(--primary)"></span>
+    wadah.innerHTML = `<div class="text-center py-16 text-gray-500">
+        <span class="spinner" style="border-color:rgba(255,255,255,0.1);border-top-color:#8B1A1A;width:28px;height:28px;"></span>
     </div>`;
 
     const semua = await fetch(`${API}/pengurus`).then(r => r.json()).catch(() => []);
@@ -358,10 +430,14 @@ async function loadPengurus() {
                 onerror="this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(p.nama)}&background=1A1F3A&color=FDF3C0'">
             <div class="p-name">${p.nama}</div>
             <div class="p-role">${p.jabatan}</div>
-            ${p.angkatan ? `<div class="td-muted" style="font-size:11px;margin-top:4px">${p.prodi || ''} '${String(p.angkatan).slice(-2)}</div>` : ''}
+            ${p.angkatan ? `<div class="p-meta">${p.prodi || ''} '${String(p.angkatan).slice(-2)}</div>` : ''}
             <div class="p-actions">
-                <button class="btn btn-ghost btn-sm" onclick="editPengurus(${p.id})"><i class="fas fa-pen"></i></button>
-                <button class="btn btn-danger btn-sm" onclick="hapusPengurus(${p.id})"><i class="fas fa-trash"></i></button>
+                <button class="btn-ghost btn-sm" onclick="editPengurus(${p.id})">
+                    <i class="fas fa-pen"></i>
+                </button>
+                <button class="btn-danger" onclick="hapusPengurus(${p.id})">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         </div>`;
 
@@ -369,9 +445,9 @@ async function loadPengurus() {
 
     // Blok Pengurus Inti
     if (inti.length) {
-        html += `<div style="margin-bottom:32px;">
+        html += `<div class="mb-8">
             <div class="dept-header" style="cursor:default;">
-                <div class="dept-icon" style="background:var(--gold)"><i class="fas fa-crown"></i></div>
+                <div class="dept-icon" style="background:var(--color-gold-500)"><i class="fas fa-crown"></i></div>
                 <div>
                     <div class="dept-name">Pengurus Inti</div>
                     <div class="dept-count">${inti.length} orang</div>
@@ -384,7 +460,7 @@ async function loadPengurus() {
     // Blok per Departemen
     Object.values(byDept).forEach(({ dept, anggota }) => {
         const uid = `dept-body-${dept.id}`;
-        html += `<div style="margin-bottom:24px;">
+        html += `<div class="mb-6">
             <div class="dept-header" onclick="toggleDept('${uid}')">
                 <div class="dept-icon" style="background:${dept.warna}">
                     <i class="fas ${dept.ikon || 'fa-users'}"></i>
@@ -397,13 +473,16 @@ async function loadPengurus() {
             </div>
             <div class="dept-body" id="${uid}">
                 ${anggota.length
-                    ? `<div class="pengurus-grid" style="padding:16px 0">${anggota.map(renderCard).join('')}</div>`
-                    : `<div class="empty" style="padding:30px"><i class="fas fa-user-slash"></i><p>Belum ada anggota</p></div>`}
+                    ? `<div class="pengurus-grid pt-2">${anggota.map(renderCard).join('')}</div>`
+                    : `<div class="text-center py-8 text-gray-500"><i class="fas fa-user-slash block text-2xl mb-2 opacity-30"></i><p class="text-sm">Belum ada anggota</p></div>`}
             </div>
         </div>`;
     });
 
-    wadah.innerHTML = html || '<div class="empty"><i class="fas fa-users-slash"></i><p>Belum ada pengurus.</p></div>';
+    wadah.innerHTML = html || `<div class="text-center py-16 text-gray-500">
+        <i class="fas fa-users-slash text-3xl mb-3 block opacity-30"></i>
+        <p>Belum ada pengurus.</p>
+    </div>`;
 }
 
 function toggleDept(id) {
@@ -485,14 +564,17 @@ async function hapusPengurus(id) {
 // ═══════════════════════════════════════════════════════════
 async function loadPesan() {
     const wadah = document.getElementById('wadah-pesan');
-    wadah.innerHTML = `<div class="empty">
-        <span class="spinner" style="border-color:rgba(0,0,0,0.1);border-top-color:var(--primary)"></span>
+    wadah.innerHTML = `<div class="text-center py-16 text-gray-500">
+        <span class="spinner" style="border-color:rgba(255,255,255,0.1);border-top-color:#8B1A1A;width:28px;height:28px;"></span>
     </div>`;
 
     const data = await fetch(`${API}/pesan`).then(r => r.json()).catch(() => []);
 
     if (!data.length) {
-        wadah.innerHTML = '<div class="empty"><i class="fas fa-inbox"></i><p>Belum ada pesan masuk.</p></div>';
+        wadah.innerHTML = `<div class="text-center py-16 text-gray-500">
+            <i class="fas fa-inbox text-4xl mb-3 block opacity-30"></i>
+            <p class="text-sm">Belum ada pesan masuk.</p>
+        </div>`;
         return;
     }
 
@@ -501,18 +583,18 @@ async function loadPesan() {
             <div>
                 <div class="pesan-sender">
                     ${p.nama}
-                    ${!p.sudah_dibaca ? '<span class="chip chip-red" style="font-size:10px;padding:2px 8px">BARU</span>' : ''}
+                    ${!p.sudah_dibaca ? '<span class="chip chip-red ml-2" style="font-size:10px;padding:2px 8px">BARU</span>' : ''}
                 </div>
                 <div class="pesan-email">${p.email}</div>
                 <div class="pesan-subjek">${p.subjek}</div>
                 <div class="pesan-preview">${p.isi.length > 120 ? p.isi.substring(0, 120) + '…' : p.isi}</div>
-                <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;">
+                <div class="mt-3 flex flex-wrap gap-2">
                     ${!p.sudah_dibaca
-                        ? `<button class="btn btn-success btn-sm" onclick="bacaPesan(${p.id})"><i class="fas fa-check"></i> Tandai Dibaca</button>`
+                        ? `<button class="btn-success" onclick="bacaPesan(${p.id})"><i class="fas fa-check"></i> Tandai Dibaca</button>`
                         : '<span class="chip chip-gray">Sudah dibaca</span>'}
-                    <button class="btn btn-danger btn-sm" onclick="hapusPesan(${p.id})"><i class="fas fa-trash"></i></button>
+                    <button class="btn-danger" onclick="hapusPesan(${p.id})"><i class="fas fa-trash"></i></button>
                     <a href="mailto:${p.email}?subject=Re: ${encodeURIComponent(p.subjek)}"
-                       class="btn btn-ghost btn-sm"><i class="fas fa-reply"></i> Balas</a>
+                       class="btn-ghost btn-sm"><i class="fas fa-reply"></i> Balas</a>
                 </div>
             </div>
             <div class="pesan-date">

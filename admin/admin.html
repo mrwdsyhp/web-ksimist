@@ -1,149 +1,223 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard — KSI Mist FMIPA UNY</title>
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="admin.css">
+    <!-- Custom CSS -->
+    <link href="./output.css" rel="stylesheet">
 </head>
-<body>
+<body class="bg-gray-900 text-gray-200 font-jakarta antialiased">
 
-<!-- ═══════════════════════════════════════════════════════
-     SIDEBAR
-═══════════════════════════════════════════════════════ -->
-<aside class="sidebar">
-    <div class="sidebar-header">
-        <div class="sidebar-logo">
-            KSI MIST
-            <span>Admin Dashboard</span>
+<!-- ═══════════════════════════════════════════════════════════
+     TOP NAVBAR
+═══════════════════════════════════════════════════════════ -->
+<nav class="fixed top-0 z-50 w-full border-b border-gray-700 bg-gray-800">
+    <div class="px-3 py-3 lg:px-5 lg:pl-3">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center justify-start">
+                <!-- Mobile sidebar toggle -->
+                <button id="sidebar-toggle-mobile"
+                    class="inline-flex items-center p-2 text-sm text-gray-400 rounded-lg sm:hidden hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-600">
+                    <i class="fas fa-bars text-base"></i>
+                </button>
+                <!-- Logo -->
+                <a href="#" class="flex ml-2 md:mr-24">
+                    <span class="logo-text text-xl tracking-widest text-gold-500">KSI MIST</span>
+                    <span class="ml-2 self-end text-xs text-gray-400 tracking-wider pb-0.5 hidden sm:inline">Admin Dashboard</span>
+                </a>
+            </div>
+            <!-- Right: Avatar -->
+            <div class="flex items-center gap-3">
+                <span class="text-sm font-semibold text-gray-300 hidden sm:block">Administrator</span>
+                <div class="w-9 h-9 rounded-full bg-primary-800 flex items-center justify-center text-white font-bold text-sm">
+                    A
+                </div>
+            </div>
         </div>
     </div>
+</nav>
 
-    <nav class="sidebar-nav">
-        <div class="nav-section">Dashboard</div>
-        <div class="nav-item active" onclick="switchTab('beranda')">
-            <i class="fas fa-home"></i> Beranda
-        </div>
+<!-- ═══════════════════════════════════════════════════════════
+     SIDEBAR
+═══════════════════════════════════════════════════════════ -->
+<aside id="sidebar"
+    class="fixed top-0 left-0 z-40 w-64 h-screen pt-16 transition-transform -translate-x-full sm:translate-x-0 border-r border-gray-700 bg-gray-900">
 
-        <div class="nav-section">Kelola Konten</div>
-        <div class="nav-item" onclick="switchTab('artikel')">
-            <i class="fas fa-newspaper"></i> Artikel &amp; Kegiatan
-        </div>
-        <div class="nav-item" onclick="switchTab('lomba')">
-            <i class="fas fa-trophy"></i> Info Lomba
-        </div>
-        <div class="nav-item" onclick="switchTab('prestasi')">
-            <i class="fas fa-award"></i> Prestasi
-        </div>
+    <div class="h-full px-3 py-4 overflow-y-auto flex flex-col">
+        <!-- Nav -->
+        <nav class="flex-1">
+            <!-- Dashboard -->
+            <p class="nav-section-label px-2 pt-4 pb-1 text-xs font-bold uppercase tracking-widest text-gray-500">Dashboard</p>
+            <ul class="space-y-0.5">
+                <li>
+                    <button onclick="switchTab('beranda')"
+                        class="nav-item active w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+                        data-tab="beranda">
+                        <i class="fas fa-home w-5 text-center text-base"></i>
+                        <span>Beranda</span>
+                    </button>
+                </li>
+            </ul>
 
-        <div class="nav-section">Organisasi</div>
-        <div class="nav-item" onclick="switchTab('pengurus')">
-            <i class="fas fa-users-cog"></i> Pengurus &amp; Departemen
-        </div>
+            <p class="nav-section-label px-2 pt-5 pb-1 text-xs font-bold uppercase tracking-widest text-gray-500">Kelola Konten</p>
+            <ul class="space-y-0.5">
+                <li>
+                    <button onclick="switchTab('artikel')"
+                        class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+                        data-tab="artikel">
+                        <i class="fas fa-newspaper w-5 text-center text-base"></i>
+                        <span>Artikel &amp; Kegiatan</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchTab('lomba')"
+                        class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+                        data-tab="lomba">
+                        <i class="fas fa-trophy w-5 text-center text-base"></i>
+                        <span>Info Lomba</span>
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchTab('prestasi')"
+                        class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+                        data-tab="prestasi">
+                        <i class="fas fa-award w-5 text-center text-base"></i>
+                        <span>Prestasi</span>
+                    </button>
+                </li>
+            </ul>
 
-        <div class="nav-section">Komunikasi</div>
-        <div class="nav-item" onclick="switchTab('pesan'); loadPesan();" id="nav-pesan">
-            <i class="fas fa-envelope"></i> Pesan Masuk
-            <span class="badge" id="badge-pesan" style="display:none">0</span>
-        </div>
-    </nav>
+            <p class="nav-section-label px-2 pt-5 pb-1 text-xs font-bold uppercase tracking-widest text-gray-500">Organisasi</p>
+            <ul class="space-y-0.5">
+                <li>
+                    <button onclick="switchTab('pengurus')"
+                        class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+                        data-tab="pengurus">
+                        <i class="fas fa-users-cog w-5 text-center text-base"></i>
+                        <span>Pengurus &amp; Departemen</span>
+                    </button>
+                </li>
+            </ul>
 
-    <div class="sidebar-footer">
-        <a href="../index.html" target="_blank">
-            <i class="fas fa-external-link-alt"></i> Lihat Website
-        </a>
+            <p class="nav-section-label px-2 pt-5 pb-1 text-xs font-bold uppercase tracking-widest text-gray-500">Komunikasi</p>
+            <ul class="space-y-0.5">
+                <li>
+                    <button onclick="switchTab('pesan'); loadPesan();" id="nav-pesan"
+                        class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all"
+                        data-tab="pesan">
+                        <i class="fas fa-envelope w-5 text-center text-base"></i>
+                        <span>Pesan Masuk</span>
+                        <span id="badge-pesan"
+                            class="ml-auto bg-primary-800 text-white text-[10px] font-bold px-2 py-0.5 rounded-full hidden">0</span>
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Footer -->
+        <div class="mt-auto pt-4 border-t border-gray-700">
+            <a href="../index.html" target="_blank"
+                class="flex items-center gap-2 px-3 py-2.5 text-sm text-gray-400 hover:text-gold-500 rounded-lg hover:bg-gray-800 transition-all">
+                <i class="fas fa-external-link-alt text-xs"></i>
+                Lihat Website
+            </a>
+        </div>
     </div>
 </aside>
 
-
-<!-- ═══════════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════
      MAIN CONTENT
-═══════════════════════════════════════════════════════ -->
-<main class="main">
+═══════════════════════════════════════════════════════════ -->
+<main class="sm:ml-64 pt-16 min-h-screen bg-gray-900">
 
-    <div class="topbar">
-        <div class="topbar-left">
-            <h1 id="page-title">Beranda</h1>
-            <p id="page-sub">Selamat datang di panel admin KSI Mist</p>
-        </div>
-        <div class="topbar-right">
-            <div class="avatar">A</div>
-            <span class="admin-name">Administrator</span>
-        </div>
+    <!-- Page Header -->
+    <div class="px-6 py-4 border-b border-gray-700 bg-gray-800">
+        <h1 id="page-title" class="text-xl font-bold text-white">Beranda</h1>
+        <p id="page-sub" class="text-sm text-gray-400 mt-0.5">Selamat datang di panel admin KSI Mist</p>
     </div>
 
-    <div class="content">
+    <div class="p-6">
 
-        <!-- ─── TAB: BERANDA ─────────────────────────────── -->
+        <!-- ─── TAB: BERANDA ──────────────────────────────────── -->
         <div id="view-beranda" class="tab-view active">
 
-            <div class="stat-grid">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:rgba(139,26,26,0.1);color:var(--primary)">
-                        <i class="fas fa-newspaper"></i>
+            <!-- Stat Cards -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-4 mb-6">
+                <!-- Artikel -->
+                <div class="stat-card bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-4">
+                    <div class="stat-icon w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary-900/40 text-primary-400">
+                        <i class="fas fa-newspaper text-lg"></i>
                     </div>
                     <div>
-                        <div class="stat-val" id="stat-artikel">—</div>
-                        <div class="stat-lbl">Artikel</div>
+                        <div id="stat-artikel" class="text-2xl font-extrabold text-white leading-none">—</div>
+                        <div class="text-xs text-gray-400 font-medium mt-1">Artikel</div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:rgba(212,175,55,0.12);color:var(--gold)">
-                        <i class="fas fa-trophy"></i>
+                <!-- Lomba -->
+                <div class="stat-card bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-4">
+                    <div class="stat-icon w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-gold-900/30 text-gold-500">
+                        <i class="fas fa-trophy text-lg"></i>
                     </div>
                     <div>
-                        <div class="stat-val" id="stat-lomba">—</div>
-                        <div class="stat-lbl">Info Lomba</div>
+                        <div id="stat-lomba" class="text-2xl font-extrabold text-white leading-none">—</div>
+                        <div class="text-xs text-gray-400 font-medium mt-1">Info Lomba</div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:rgba(56,161,105,0.12);color:var(--success)">
-                        <i class="fas fa-award"></i>
+                <!-- Prestasi -->
+                <div class="stat-card bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-4">
+                    <div class="stat-icon w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-green-900/30 text-green-400">
+                        <i class="fas fa-award text-lg"></i>
                     </div>
                     <div>
-                        <div class="stat-val" id="stat-prestasi">—</div>
-                        <div class="stat-lbl">Prestasi</div>
+                        <div id="stat-prestasi" class="text-2xl font-extrabold text-white leading-none">—</div>
+                        <div class="text-xs text-gray-400 font-medium mt-1">Prestasi</div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:rgba(49,130,206,0.12);color:var(--info)">
-                        <i class="fas fa-users"></i>
+                <!-- Pengurus -->
+                <div class="stat-card bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-4">
+                    <div class="stat-icon w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-blue-900/30 text-blue-400">
+                        <i class="fas fa-users text-lg"></i>
                     </div>
                     <div>
-                        <div class="stat-val" id="stat-pengurus">—</div>
-                        <div class="stat-lbl">Pengurus</div>
+                        <div id="stat-pengurus" class="text-2xl font-extrabold text-white leading-none">—</div>
+                        <div class="text-xs text-gray-400 font-medium mt-1">Pengurus</div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background:rgba(229,62,62,0.1);color:var(--danger)">
-                        <i class="fas fa-envelope"></i>
+                <!-- Pesan -->
+                <div class="stat-card bg-gray-800 border border-gray-700 rounded-xl p-4 flex items-center gap-4 col-span-2 sm:col-span-1">
+                    <div class="stat-icon w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 bg-primary-900/30 text-primary-400">
+                        <i class="fas fa-envelope text-lg"></i>
                     </div>
                     <div>
-                        <div class="stat-val" id="stat-pesan">—</div>
-                        <div class="stat-lbl">Pesan Baru</div>
+                        <div id="stat-pesan" class="text-2xl font-extrabold text-white leading-none">—</div>
+                        <div class="text-xs text-gray-400 font-medium mt-1">Pesan Baru</div>
                     </div>
                 </div>
             </div>
 
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Akses Cepat</span>
+            <!-- Akses Cepat -->
+            <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700">
+                    <span class="text-sm font-bold text-white">Akses Cepat</span>
                 </div>
-                <div class="panel-body" style="display:flex;gap:12px;flex-wrap:wrap;">
-                    <button class="btn btn-primary" onclick="switchTab('artikel'); openModal('modal-konten','artikel')">
+                <div class="p-5 flex flex-wrap gap-3">
+                    <button class="btn-primary" onclick="switchTab('artikel'); openModal('modal-konten','artikel')">
                         <i class="fas fa-plus"></i> Tambah Artikel
                     </button>
-                    <button class="btn btn-ghost" onclick="switchTab('lomba'); openModal('modal-konten','lomba')">
+                    <button class="btn-ghost" onclick="switchTab('lomba'); openModal('modal-konten','lomba')">
                         <i class="fas fa-plus"></i> Tambah Lomba
                     </button>
-                    <button class="btn btn-ghost" onclick="switchTab('prestasi'); openModal('modal-konten','prestasi')">
+                    <button class="btn-ghost" onclick="switchTab('prestasi'); openModal('modal-konten','prestasi')">
                         <i class="fas fa-plus"></i> Tambah Prestasi
                     </button>
-                    <button class="btn btn-ghost" onclick="switchTab('pengurus'); setTimeout(()=>openModalPengurus(),200)">
+                    <button class="btn-ghost" onclick="switchTab('pengurus'); setTimeout(()=>openModalPengurus(),200)">
                         <i class="fas fa-user-plus"></i> Tambah Pengurus
                     </button>
                 </div>
@@ -152,36 +226,38 @@
         </div>
 
 
-        <!-- ─── TAB: ARTIKEL ─────────────────────────────── -->
+        <!-- ─── TAB: ARTIKEL ──────────────────────────────────── -->
         <div id="view-artikel" class="tab-view">
 
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                <div class="sub-tabs" style="border-bottom:none;margin-bottom:0;">
-                    <span class="sub-tab active" onclick="filterJenisArtikel(this,'')">Semua</span>
-                    <span class="sub-tab" onclick="filterJenisArtikel(this,'Berita')">Berita</span>
-                    <span class="sub-tab" onclick="filterJenisArtikel(this,'Kegiatan')">Kegiatan</span>
-                    <span class="sub-tab" onclick="filterJenisArtikel(this,'Opini')">Opini</span>
-                    <span class="sub-tab" onclick="filterJenisArtikel(this,'Tutorial')">Tutorial</span>
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                <div class="sub-tabs flex gap-1">
+                    <button class="sub-tab active" onclick="filterJenisArtikel(this,'')">Semua</button>
+                    <button class="sub-tab" onclick="filterJenisArtikel(this,'Berita')">Berita</button>
+                    <button class="sub-tab" onclick="filterJenisArtikel(this,'Kegiatan')">Kegiatan</button>
+                    <button class="sub-tab" onclick="filterJenisArtikel(this,'Opini')">Opini</button>
+                    <button class="sub-tab" onclick="filterJenisArtikel(this,'Tutorial')">Tutorial</button>
                 </div>
-                <button class="btn btn-primary btn-sm" onclick="openModal('modal-konten','artikel')">
+                <button class="btn-primary btn-sm" onclick="openModal('modal-konten','artikel')">
                     <i class="fas fa-plus"></i> Tambah
                 </button>
             </div>
 
-            <div class="panel">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
+            <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-700/60 text-xs uppercase tracking-wider text-gray-400">
                             <tr>
-                                <th>Thumbnail</th>
-                                <th>Judul</th>
-                                <th>Jenis</th>
-                                <th>Tanggal</th>
-                                <th>Aksi</th>
+                                <th class="px-4 py-3">Thumbnail</th>
+                                <th class="px-4 py-3">Judul</th>
+                                <th class="px-4 py-3">Jenis</th>
+                                <th class="px-4 py-3">Tanggal</th>
+                                <th class="px-4 py-3">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="tbody-artikel">
-                            <tr><td colspan="5" class="empty"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>
+                        <tbody id="tbody-artikel" class="divide-y divide-gray-700">
+                            <tr><td colspan="5" class="text-center py-10 text-gray-500">
+                                <i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i> Memuat...
+                            </td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -190,39 +266,41 @@
         </div>
 
 
-        <!-- ─── TAB: INFO LOMBA ──────────────────────────── -->
+        <!-- ─── TAB: INFO LOMBA ───────────────────────────────── -->
         <div id="view-lomba" class="tab-view">
 
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                <div class="sub-tabs" style="border-bottom:none;margin-bottom:0;">
-                    <span class="sub-tab active" onclick="filterJenisLomba(this,'')">Semua</span>
-                    <span class="sub-tab" onclick="filterJenisLomba(this,'LKTI')">LKTI</span>
-                    <span class="sub-tab" onclick="filterJenisLomba(this,'Essay')">Essay</span>
-                    <span class="sub-tab" onclick="filterJenisLomba(this,'PKM')">PKM</span>
-                    <span class="sub-tab" onclick="filterJenisLomba(this,'Desain')">Desain</span>
-                    <span class="sub-tab" onclick="filterJenisLomba(this,'BPC')">BPC</span>
-                    <span class="sub-tab" onclick="filterJenisLomba(this,'Internasional')">Internasional</span>
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                <div class="sub-tabs flex flex-wrap gap-1">
+                    <button class="sub-tab active" onclick="filterJenisLomba(this,'')">Semua</button>
+                    <button class="sub-tab" onclick="filterJenisLomba(this,'LKTI')">LKTI</button>
+                    <button class="sub-tab" onclick="filterJenisLomba(this,'Essay')">Essay</button>
+                    <button class="sub-tab" onclick="filterJenisLomba(this,'PKM')">PKM</button>
+                    <button class="sub-tab" onclick="filterJenisLomba(this,'Desain')">Desain</button>
+                    <button class="sub-tab" onclick="filterJenisLomba(this,'BPC')">BPC</button>
+                    <button class="sub-tab" onclick="filterJenisLomba(this,'Internasional')">Internasional</button>
                 </div>
-                <button class="btn btn-primary btn-sm" onclick="openModal('modal-konten','lomba')">
+                <button class="btn-primary btn-sm" onclick="openModal('modal-konten','lomba')">
                     <i class="fas fa-plus"></i> Tambah
                 </button>
             </div>
 
-            <div class="panel">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
+            <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-700/60 text-xs uppercase tracking-wider text-gray-400">
                             <tr>
-                                <th>Poster</th>
-                                <th>Nama Lomba</th>
-                                <th>Jenis</th>
-                                <th>Tingkat</th>
-                                <th>Deadline</th>
-                                <th>Aksi</th>
+                                <th class="px-4 py-3">Poster</th>
+                                <th class="px-4 py-3">Nama Lomba</th>
+                                <th class="px-4 py-3">Jenis</th>
+                                <th class="px-4 py-3">Tingkat</th>
+                                <th class="px-4 py-3">Deadline</th>
+                                <th class="px-4 py-3">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="tbody-lomba">
-                            <tr><td colspan="6" class="empty"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>
+                        <tbody id="tbody-lomba" class="divide-y divide-gray-700">
+                            <tr><td colspan="6" class="text-center py-10 text-gray-500">
+                                <i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i> Memuat...
+                            </td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -231,36 +309,38 @@
         </div>
 
 
-        <!-- ─── TAB: PRESTASI ────────────────────────────── -->
+        <!-- ─── TAB: PRESTASI ─────────────────────────────────── -->
         <div id="view-prestasi" class="tab-view">
 
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                <div class="sub-tabs" style="border-bottom:none;margin-bottom:0;">
-                    <span class="sub-tab active" onclick="filterTingkatPrestasi(this,'')">Semua</span>
-                    <span class="sub-tab" onclick="filterTingkatPrestasi(this,'Nasional')">Nasional</span>
-                    <span class="sub-tab" onclick="filterTingkatPrestasi(this,'Internasional')">Internasional</span>
-                    <span class="sub-tab" onclick="filterTingkatPrestasi(this,'Regional')">Regional</span>
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+                <div class="sub-tabs flex gap-1">
+                    <button class="sub-tab active" onclick="filterTingkatPrestasi(this,'')">Semua</button>
+                    <button class="sub-tab" onclick="filterTingkatPrestasi(this,'Nasional')">Nasional</button>
+                    <button class="sub-tab" onclick="filterTingkatPrestasi(this,'Internasional')">Internasional</button>
+                    <button class="sub-tab" onclick="filterTingkatPrestasi(this,'Regional')">Regional</button>
                 </div>
-                <button class="btn btn-primary btn-sm" onclick="openModal('modal-konten','prestasi')">
+                <button class="btn-primary btn-sm" onclick="openModal('modal-konten','prestasi')">
                     <i class="fas fa-plus"></i> Tambah
                 </button>
             </div>
 
-            <div class="panel">
-                <div class="table-wrap">
-                    <table>
-                        <thead>
+            <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="bg-gray-700/60 text-xs uppercase tracking-wider text-gray-400">
                             <tr>
-                                <th>Foto</th>
-                                <th>Judul / Kompetisi</th>
-                                <th>Juara</th>
-                                <th>Tingkat</th>
-                                <th>Tahun</th>
-                                <th>Aksi</th>
+                                <th class="px-4 py-3">Foto</th>
+                                <th class="px-4 py-3">Judul / Kompetisi</th>
+                                <th class="px-4 py-3">Juara</th>
+                                <th class="px-4 py-3">Tingkat</th>
+                                <th class="px-4 py-3">Tahun</th>
+                                <th class="px-4 py-3">Aksi</th>
                             </tr>
                         </thead>
-                        <tbody id="tbody-prestasi">
-                            <tr><td colspan="6" class="empty"><i class="fas fa-spinner fa-spin"></i> Memuat...</td></tr>
+                        <tbody id="tbody-prestasi" class="divide-y divide-gray-700">
+                            <tr><td colspan="6" class="text-center py-10 text-gray-500">
+                                <i class="fas fa-spinner fa-spin text-2xl mb-2 block"></i> Memuat...
+                            </td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -269,19 +349,19 @@
         </div>
 
 
-        <!-- ─── TAB: PENGURUS ────────────────────────────── -->
+        <!-- ─── TAB: PENGURUS ─────────────────────────────────── -->
         <div id="view-pengurus" class="tab-view">
 
-            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
-                <h2 style="font-size:16px;font-weight:700;color:var(--dark);">Susunan Pengurus KSI Mist 2026</h2>
-                <button class="btn btn-primary btn-sm" onclick="openModalPengurus()">
+            <div class="flex items-center justify-between mb-5">
+                <h2 class="text-base font-bold text-white">Susunan Pengurus KSI Mist 2026</h2>
+                <button class="btn-primary btn-sm" onclick="openModalPengurus()">
                     <i class="fas fa-user-plus"></i> Tambah Pengurus
                 </button>
             </div>
 
             <div id="wadah-pengurus">
-                <div class="empty">
-                    <i class="fas fa-spinner fa-spin"></i>
+                <div class="text-center py-16 text-gray-500">
+                    <i class="fas fa-spinner fa-spin text-3xl mb-3 block"></i>
                     <p>Memuat data pengurus...</p>
                 </div>
             </div>
@@ -289,19 +369,19 @@
         </div>
 
 
-        <!-- ─── TAB: PESAN MASUK ─────────────────────────── -->
+        <!-- ─── TAB: PESAN MASUK ──────────────────────────────── -->
         <div id="view-pesan" class="tab-view">
 
-            <div class="panel">
-                <div class="panel-header">
-                    <span class="panel-title">Pesan Masuk</span>
-                    <button class="btn btn-ghost btn-sm" onclick="loadPesan()">
+            <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-4 border-b border-gray-700">
+                    <span class="text-sm font-bold text-white">Pesan Masuk</span>
+                    <button class="btn-ghost btn-sm" onclick="loadPesan()">
                         <i class="fas fa-sync-alt"></i> Refresh
                     </button>
                 </div>
                 <div id="wadah-pesan">
-                    <div class="empty">
-                        <i class="fas fa-spinner fa-spin"></i>
+                    <div class="text-center py-16 text-gray-500">
+                        <i class="fas fa-spinner fa-spin text-3xl mb-3 block"></i>
                         <p>Memuat pesan...</p>
                     </div>
                 </div>
@@ -309,32 +389,34 @@
 
         </div>
 
-    </div><!-- /content -->
+    </div><!-- /p-6 -->
 </main>
 
 
-<!-- ═══════════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════
      MODAL: TAMBAH / EDIT KONTEN
-═══════════════════════════════════════════════════════ -->
-<div id="modal-konten" class="modal-overlay">
-    <div class="modal">
-        <div class="modal-header">
-            <span class="modal-title" id="modal-konten-title">Tambah Konten</span>
-            <button class="modal-close" onclick="closeModal('modal-konten')">✕</button>
+═══════════════════════════════════════════════════════════ -->
+<div id="modal-konten" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="modal bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-gray-800 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-700">
+            <span class="text-base font-bold text-white" id="modal-konten-title">Tambah Konten</span>
+            <button class="text-gray-400 hover:text-white text-xl leading-none p-1 transition-colors" onclick="closeModal('modal-konten')">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <div class="modal-body">
-            <form id="form-konten">
+        <div class="p-6">
+            <form id="form-konten" class="space-y-4">
                 <input type="hidden" id="fk-id">
                 <input type="hidden" id="fk-kategori">
 
                 <div class="form-group">
-                    <label>Judul *</label>
+                    <label class="form-label">Judul *</label>
                     <input type="text" id="fk-judul" class="form-control" placeholder="Judul konten" required>
                 </div>
 
                 <!-- Khusus Artikel -->
-                <div class="form-group" id="grp-jenis-artikel">
-                    <label>Jenis Artikel</label>
+                <div id="grp-jenis-artikel" class="form-group">
+                    <label class="form-label">Jenis Artikel</label>
                     <select id="fk-jenis-artikel" class="form-control">
                         <option value="">-- Pilih Jenis --</option>
                         <option>Berita</option>
@@ -346,10 +428,10 @@
                 </div>
 
                 <!-- Khusus Info Lomba -->
-                <div id="grp-lomba">
-                    <div class="form-row">
+                <div id="grp-lomba" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label>Jenis Lomba</label>
+                            <label class="form-label">Jenis Lomba</label>
                             <select id="fk-jenis" class="form-control">
                                 <option value="">-- Pilih --</option>
                                 <option>LKTI</option>
@@ -362,7 +444,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Tingkat</label>
+                            <label class="form-label">Tingkat</label>
                             <select id="fk-tingkat" class="form-control">
                                 <option value="">-- Pilih --</option>
                                 <option>Nasional</option>
@@ -372,23 +454,23 @@
                             </select>
                         </div>
                     </div>
-                    <div class="form-row">
+                    <div class="grid grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label>Deadline Pendaftaran</label>
+                            <label class="form-label">Deadline Pendaftaran</label>
                             <input type="date" id="fk-deadline" class="form-control">
                         </div>
                         <div class="form-group">
-                            <label>Link Daftar / Flyer</label>
+                            <label class="form-label">Link Daftar / Flyer</label>
                             <input type="url" id="fk-link" class="form-control" placeholder="https://...">
                         </div>
                     </div>
                 </div>
 
                 <!-- Khusus Prestasi -->
-                <div id="grp-prestasi">
-                    <div class="form-row">
+                <div id="grp-prestasi" class="space-y-4">
+                    <div class="grid grid-cols-2 gap-4">
                         <div class="form-group">
-                            <label>Peringkat / Juara</label>
+                            <label class="form-label">Peringkat / Juara</label>
                             <select id="fk-peringkat" class="form-control">
                                 <option value="">-- Pilih --</option>
                                 <option value="1">Juara 1</option>
@@ -403,7 +485,7 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Tingkat Kompetisi</label>
+                            <label class="form-label">Tingkat Kompetisi</label>
                             <select id="fk-tingkat-prestasi" class="form-control">
                                 <option value="">-- Pilih --</option>
                                 <option>Nasional</option>
@@ -414,33 +496,33 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Nama Kompetisi</label>
+                        <label class="form-label">Nama Kompetisi</label>
                         <input type="text" id="fk-nama-kompetisi" class="form-control" placeholder="PIMNAS, LKTIN, dll.">
                     </div>
                     <div class="form-group">
-                        <label>Anggota Tim (pisahkan koma)</label>
+                        <label class="form-label">Anggota Tim (pisahkan koma)</label>
                         <input type="text" id="fk-anggota-tim" class="form-control" placeholder="Budi, Ani, Citra">
                     </div>
                 </div>
 
-                <!-- Bersama semua kategori -->
-                <div class="form-row">
+                <!-- Bersama semua -->
+                <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
-                        <label>Tanggal</label>
+                        <label class="form-label">Tanggal</label>
                         <input type="date" id="fk-tanggal" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label>Thumbnail / Poster</label>
+                        <label class="form-label">Thumbnail / Poster</label>
                         <input type="file" id="fk-thumbnail" class="form-control" accept="image/*">
-                        <div class="form-hint">Format JPG/PNG, maks 5MB</div>
+                        <p class="text-xs text-gray-500 mt-1">Format JPG/PNG, maks 5MB</p>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Deskripsi / Isi</label>
-                    <textarea id="fk-isi" class="form-control" placeholder="Tuliskan detail..."></textarea>
+                    <label class="form-label">Deskripsi / Isi</label>
+                    <textarea id="fk-isi" class="form-control min-h-[120px] resize-y" placeholder="Tuliskan detail..."></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-full" id="btn-save-konten">
+                <button type="submit" class="btn-primary w-full justify-center" id="btn-save-konten">
                     <i class="fas fa-save"></i> Simpan
                 </button>
             </form>
@@ -449,33 +531,35 @@
 </div>
 
 
-<!-- ═══════════════════════════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════════
      MODAL: TAMBAH / EDIT PENGURUS
-═══════════════════════════════════════════════════════ -->
-<div id="modal-pengurus" class="modal-overlay">
-    <div class="modal">
-        <div class="modal-header">
-            <span class="modal-title" id="modal-pengurus-title">Tambah Pengurus</span>
-            <button class="modal-close" onclick="closeModal('modal-pengurus')">✕</button>
+═══════════════════════════════════════════════════════════ -->
+<div id="modal-pengurus" class="modal-overlay fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+    <div class="modal bg-gray-800 border border-gray-700 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div class="sticky top-0 bg-gray-800 z-10 flex items-center justify-between px-6 py-4 border-b border-gray-700">
+            <span class="text-base font-bold text-white" id="modal-pengurus-title">Tambah Pengurus</span>
+            <button class="text-gray-400 hover:text-white text-xl leading-none p-1 transition-colors" onclick="closeModal('modal-pengurus')">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
-        <div class="modal-body">
-            <form id="form-pengurus">
+        <div class="p-6">
+            <form id="form-pengurus" class="space-y-4">
                 <input type="hidden" id="fp-id">
 
-                <div class="form-row">
+                <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
-                        <label>Nama Lengkap *</label>
+                        <label class="form-label">Nama Lengkap *</label>
                         <input type="text" id="fp-nama" class="form-control" placeholder="Nama pengurus" required>
                     </div>
                     <div class="form-group">
-                        <label>Jabatan *</label>
+                        <label class="form-label">Jabatan *</label>
                         <input type="text" id="fp-jabatan" class="form-control" placeholder="Cth: Kepala Departemen" required>
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
-                        <label>Level Jabatan *</label>
+                        <label class="form-label">Level Jabatan *</label>
                         <select id="fp-level" class="form-control" required>
                             <option value="kepala">Kepala Departemen</option>
                             <option value="staf_ahli">Staf Ahli</option>
@@ -483,38 +567,37 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Departemen</label>
+                        <label class="form-label">Departemen</label>
                         <select id="fp-dept" class="form-control">
                             <option value="">— Pengurus Inti —</option>
                         </select>
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
-                        <label>Angkatan</label>
-                        <input type="number" id="fp-angkatan" class="form-control"
-                               placeholder="2023" min="2000" max="2030">
+                        <label class="form-label">Angkatan</label>
+                        <input type="number" id="fp-angkatan" class="form-control" placeholder="2023" min="2000" max="2030">
                     </div>
                     <div class="form-group">
-                        <label>Program Studi</label>
+                        <label class="form-label">Program Studi</label>
                         <input type="text" id="fp-prodi" class="form-control" placeholder="Fisika, Kimia, dll.">
                     </div>
                 </div>
 
-                <div class="form-row">
+                <div class="grid grid-cols-2 gap-4">
                     <div class="form-group">
-                        <label>Foto</label>
+                        <label class="form-label">Foto</label>
                         <input type="file" id="fp-foto" class="form-control" accept="image/*">
                     </div>
                     <div class="form-group">
-                        <label>Urutan Tampil</label>
+                        <label class="form-label">Urutan Tampil</label>
                         <input type="number" id="fp-urutan" class="form-control" value="99" min="1" max="999">
-                        <div class="form-hint">Angka kecil tampil lebih dulu</div>
+                        <p class="text-xs text-gray-500 mt-1">Angka kecil tampil lebih dulu</p>
                     </div>
                 </div>
 
-                <button type="submit" class="btn btn-primary btn-full" id="btn-save-pengurus">
+                <button type="submit" class="btn-primary w-full justify-center" id="btn-save-pengurus">
                     <i class="fas fa-save"></i> Simpan Pengurus
                 </button>
             </form>
@@ -524,9 +607,12 @@
 
 
 <!-- Toast Notification -->
-<div id="toast"></div>
+<div id="toast" class="fixed bottom-6 right-6 z-[9999] px-5 py-3.5 rounded-xl text-sm font-semibold text-white shadow-2xl
+    translate-y-5 opacity-0 transition-all duration-300 max-w-sm pointer-events-none"></div>
 
-<!-- Script Admin — dimuat setelah semua elemen tersedia -->
+<!-- Flowbite JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+<!-- Admin JS -->
 <script src="admin.js"></script>
 </body>
 </html>

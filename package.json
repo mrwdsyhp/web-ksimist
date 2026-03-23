@@ -22,11 +22,14 @@
     "url": "https://github.com/mrwdsyhp/web-ksimist/issues"
   },
   "homepage": "https://github.com/mrwdsyhp/web-ksimist#readme",
-"dependencies": {
+  "dependencies": {
+    "@tailwindcss/cli": "^4.2.2",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
     "express": "^4.18.2",
+    "flowbite": "^4.0.1",
     "multer": "^2.1.1",
-    "mysql2": "^3.9.1"
+    "mysql2": "^3.9.1",
+    "tailwindcss": "^4.2.2"
   }
 }
