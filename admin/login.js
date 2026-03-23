@@ -12,7 +12,7 @@
 'use strict';
 
 // ── KONFIGURASI ───────────────────────────────────────────
-const API_LOGIN = 'https://web-ksimist.up.railway.app/api/auth/login';
+const API_LOGIN = 'https://web-ksimist-production.up.railway.app/api/auth/login';
 // Ganti path ini jika admin.html ada di subfolder berbeda
 const ADMIN_PAGE = './admin.html';
 

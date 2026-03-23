@@ -7,7 +7,7 @@
 
 'use strict';
 
-const BASE_URL = 'https://web-ksimist.up.railway.app';
+const BASE_URL = 'https://web-ksimist-production.up.railway.app';
 const API_URL  = `${BASE_URL}/api`;
 
 // ═══════════════════════════════════════════════════════════

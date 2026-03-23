@@ -31,7 +31,7 @@ function logout() {
     window.location.replace('./login.html');
 }
 
-const API = 'https://web-ksimist.up.railway.app/api';
+const API = 'https://web-ksimist-production.up.railway.app/api';
 
 // ═══════════════════════════════════════════════════════════
 // UTILITY: TOAST NOTIFICATION
