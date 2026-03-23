@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detail - KSI Mist FMIPA UNY</title>
+    <link rel="icon" type="image/jpeg" href="assets/logo/images.jpg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="output.css">
+    <style>
+        /* ── Detail Page Styles ── */
+        .detail-hero {
+            padding-top: 100px;
+            padding-bottom: 0;
+            background: var(--section-dark, #0d0f1a);
+            position: relative;
+            overflow: hidden;
+        }
+        .detail-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 70% 50%, rgba(139,26,26,0.18) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .detail-hero-inner {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 60px 24px 48px;
+        }
+        .detail-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--muted, #888);
+            text-decoration: none;
+            margin-bottom: 28px;
+            transition: color 0.2s;
+        }
+        .detail-back:hover { color: var(--primary, #8B1A1A); }
+
+        .detail-tipe-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--primary, #8B1A1A);
+            background: rgba(139,26,26,0.12);
+            border: 1px solid rgba(139,26,26,0.3);
+            border-radius: 20px;
+            padding: 4px 14px;
+            margin-bottom: 18px;
+        }
+        .detail-judul {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: clamp(26px, 4vw, 42px);
+            font-weight: 800;
+            line-height: 1.25;
+            color: var(--secondary, #FDF3C0);
+            margin-bottom: 20px;
+        }
+        .detail-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            font-size: 13px;
+            color: var(--muted, #888);
+            margin-bottom: 0;
+        }
+        .detail-meta span {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .detail-meta i { color: var(--primary, #8B1A1A); }
+
+        /* Thumbnail */
+        .detail-thumb-wrap {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 0 24px;
+            margin-top: -1px;
+        }
+        .detail-thumb-wrap img {
+            width: 100%;
+            max-height: 420px;
+            object-fit: cover;
+            border-radius: 12px;
+            display: block;
+            margin-top: 36px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+
+        /* Content Body */
+        .detail-body {
+            max-width: 860px;
+            margin: 0 auto;
+            padding: 40px 24px 80px;
+        }
+
+        /* Info Boxes khusus Lomba */
+        .lomba-infobox {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 36px;
+            padding: 24px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+        }
+        .lomba-infobox-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .lomba-infobox-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--muted, #888);
+        }
+        .lomba-infobox-value {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--secondary, #FDF3C0);
+        }
+        .lomba-infobox-value.expired { color: var(--muted, #888); text-decoration: line-through; }
+        .lomba-infobox-value.urgent  { color: #f97316; }
+
+        .btn-daftar {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--primary, #8B1A1A);
+            color: var(--secondary, #FDF3C0);
+            font-size: 14px;
+            font-weight: 700;
+            padding: 14px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.15s;
+            margin-bottom: 36px;
+        }
+        .btn-daftar:hover { background: #a01f1f; transform: translateY(-2px); }
+
+        /* Prestasi infobox */
+        .prestasi-infobox {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            padding: 24px;
+            background: rgba(212,175,55,0.07);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 12px;
+            margin-bottom: 32px;
+        }
+        .prestasi-medal {
+            font-size: 56px;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+        .prestasi-infobox-text { display: flex; flex-direction: column; gap: 4px; }
+        .prestasi-juara {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 28px;
+            color: #D4AF37;
+            letter-spacing: 0.05em;
+        }
+        .prestasi-kompetisi {
+            font-size: 14px;
+            color: var(--muted, #888);
+        }
+        .prestasi-tingkat {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary, #8B1A1A);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Tim anggota */
+        .anggota-tim-wrap {
+            margin-top: 24px;
+            padding: 16px 20px;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+            border-left: 3px solid var(--primary, #8B1A1A);
+        }
+        .anggota-tim-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--muted, #888);
+            margin-bottom: 6px;
+        }
+        .anggota-tim-names {
+            font-size: 14px;
+            color: var(--secondary, #FDF3C0);
+            line-height: 1.7;
+        }
+
+        /* Konten Isi (artikel / deskripsi) */
+        .detail-isi {
+            font-size: 16px;
+            line-height: 1.9;
+            color: rgba(253,243,192,0.75);
+        }
+        .detail-isi p { margin-bottom: 16px; }
+
+        /* Skeleton loader */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 6px;
+        }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+        /* Error state */
+        .detail-error {
+            text-align: center;
+            padding: 80px 24px;
+            color: var(--muted, #888);
+        }
+        .detail-error i { font-size: 48px; display: block; margin-bottom: 16px; opacity: 0.3; }
+        .detail-error h2 { font-size: 22px; color: var(--secondary, #FDF3C0); margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+
+    <div class="ticker-wrap" id="ticker-wrap" style="display:none;">
+        <div class="ticker-inner">
+            <span class="ticker-label">TERBARU</span>
+            <div class="ticker-overflow">
+                <div class="ticker-track" id="ticker-track"></div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar" id="navbar">
+        <a href="index.html#beranda" class="navbar-brand">
+            <img src="assets/logo/images.jpg" class="brand-logo" alt="Logo KSI Mist">
+            <div class="brand-fallback">KSI</div>
+            <div class="brand-text">
+                <span class="brand-name">KSI Mist</span>
+                <span class="brand-sub">FMIPA UNY</span>
+            </div>
+        </a>
+        <ul class="navbar-links">
+            <li><a href="index.html#beranda">Beranda</a></li>
+            <li><a href="artikel.html">Artikel</a></li>
+            <li><a href="info-lomba.html">Info Lomba</a></li>
+            <li><a href="prestasi.html">Prestasi</a></li>
+            <li><a href="index.html#tentang">Tentang</a></li>
+            <li><a href="departemen.html">Departemen</a></li>
+            <li><a href="hubungi-kami.html" class="btn-hubungi">Hubungi Kami</a></li>
+        </ul>
+        <button class="navbar-toggle" id="navbar-toggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
+    </nav>
+
+    <!-- Konten dinamis akan dirender di sini -->
+    <div id="detail-root"></div>
+
+    <footer id="hubungi-kami">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <strong>KSI MIST FMIPA UNY</strong>
+                <p>Kelompok Studi Ilmiah MIPA Saintis — Unit Kegiatan Mahasiswa FMIPA Universitas Negeri Yogyakarta.</p>
+                <div class="sosmed">
+                    <a href="https://www.facebook.com/ksi.mist/" target="_blank" class="icon-circle"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.youtube.com/@ksimiststory1255" target="_blank" class="icon-circle"><i class="fab fa-youtube"></i></a>
+                    <a href="https://www.instagram.com/ksimistfmipauny/?hl=id" target="_blank" class="icon-circle"><i class="fab fa-instagram"></i></a>
+                    <a href="https://www.linkedin.com/in/ksi-mist-fmipa-uny-405004264/" target="_blank" class="icon-circle"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="https://www.tiktok.com/@ksimistfmipauny" target="_blank" class="social-btn"><i class="fab fa-tiktok"></i></a>
+                </div>
+            </div>
+            <div class="footer-col">
+                <h5>Navigasi</h5>
+                <a href="index.html#beranda">Beranda</a>
+                <a href="index.html#artikel">Artikel &amp; Kegiatan</a>
+                <a href="index.html#info-lomba">Info Lomba</a>
+                <a href="index.html#prestasi">Prestasi</a>
+                <a href="index.html#pengumuman">Pengumuman</a>
+                <a href="departemen.html">Departemen</a>
+            </div>
+            <div class="footer-col">
+                <h5>Info Lomba</h5>
+                <a href="#">LKTI</a>
+                <a href="#">Essay</a>
+                <a href="#">Desain</a>
+                <a href="#">BPC</a>
+                <a href="#">Internasional</a>
+            </div>
+            <div class="footer-col">
+                <h5>Kontak Kami</h5>
+                <a href="#"><i class="fas fa-map-marker-alt"></i> FMIPA UNY, Yogyakarta</a>
+                <a href="mailto:ksimist@student.uny.ac.id"><i class="fas fa-envelope"></i> ksimist@student.uny.ac.id</a>
+                <a href="https://wa.me/6289606050600" target="_blank"><i class="fab fa-whatsapp"></i> CP Humas</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <span>© 2026 KSI Mist Pilar Mahakarya 2026. All rights reserved.</span>
+            <span>#InspirasiKeilmiahan 🇮🇩</span>
+        </div>
+    </footer>
+
+    <button id="backTop" aria-label="Kembali ke atas">↑</button>
+
+    <script src="assets/js/main.js" defer></script>
+    <script>
+    // ── Detail Page Logic ──────────────────────────────────
+    const BASE_URL  = 'https://web-ksimist-production.up.railway.app';
+    const API_URL   = `${BASE_URL}/api`;
+
+    const params    = new URLSearchParams(window.location.search);
+    const itemId    = params.get('id');
+    const tipe      = params.get('tipe'); // 'artikel' | 'lomba' | 'prestasi'
+    const root      = document.getElementById('detail-root');
+
+    // Label & link kembali per tipe
+    const tipeConfig = {
+        artikel:  { label: 'Artikel & Kegiatan', backUrl: 'artikel.html',   icon: 'fa-newspaper',  badgeText: 'Artikel' },
+        lomba:    { label: 'Info Lomba',          backUrl: 'info-lomba.html', icon: 'fa-trophy',     badgeText: 'Info Lomba' },
+        prestasi: { label: 'Galeri Prestasi',     backUrl: 'prestasi.html',  icon: 'fa-medal',      badgeText: 'Prestasi' },
+    };
+
+    function showSkeleton() {
+        root.innerHTML = `
+            <div class="detail-hero">
+                <div class="detail-hero-inner">
+                    <div class="skeleton" style="width:100px;height:14px;margin-bottom:28px;"></div>
+                    <div class="skeleton" style="width:120px;height:22px;border-radius:20px;margin-bottom:18px;"></div>
+                    <div class="skeleton" style="width:90%;height:36px;margin-bottom:12px;"></div>
+                    <div class="skeleton" style="width:60%;height:36px;margin-bottom:24px;"></div>
+                    <div style="display:flex;gap:16px;">
+                        <div class="skeleton" style="width:100px;height:14px;"></div>
+                        <div class="skeleton" style="width:120px;height:14px;"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="detail-thumb-wrap">
+                <div class="skeleton" style="width:100%;height:360px;border-radius:12px;margin-top:36px;"></div>
+            </div>
+            <div class="detail-body">
+                <div class="skeleton" style="width:100%;height:14px;margin-bottom:10px;"></div>
+                <div class="skeleton" style="width:95%;height:14px;margin-bottom:10px;"></div>
+                <div class="skeleton" style="width:80%;height:14px;margin-bottom:10px;"></div>
+            </div>`;
+    }
+
+    function showError(msg) {
+        root.innerHTML = `
+            <div style="min-height:60vh;display:flex;align-items:center;justify-content:center;">
+                <div class="detail-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <h2>Konten Tidak Ditemukan</h2>
+                    <p>${msg || 'Data tidak tersedia.'}</p>
+                    <a href="index.html" style="display:inline-block;margin-top:20px;color:var(--primary);font-weight:700;">← Kembali ke Beranda</a>
+                </div>
+            </div>`;
+    }
+
+    function formatTanggal(str) {
+        if (!str) return null;
+        return new Date(str).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+
+    function renderArtikel(d, cfg) {
+        document.title = `${d.judul} — KSI Mist FMIPA UNY`;
+        root.innerHTML = `
+            <section class="detail-hero section-dark">
+                <div class="detail-hero-inner">
+                    <a href="${cfg.backUrl}" class="detail-back">
+                        <i class="fas fa-arrow-left"></i> Kembali ke ${cfg.label}
+                    </a>
+                    <div class="detail-tipe-badge">
+                        <i class="fas ${cfg.icon}"></i> ${d.jenis_artikel || cfg.badgeText}
+                    </div>
+                    <h1 class="detail-judul">${d.judul}</h1>
+                    <div class="detail-meta">
+                        ${d.tanggal ? `<span><i class="fas fa-calendar-alt"></i> ${formatTanggal(d.tanggal)}</span>` : ''}
+                    </div>
+                </div>
+            </section>
+            ${d.thumbnail_url ? `
+            <div class="detail-thumb-wrap">
+                <img src="${d.thumbnail_url}" alt="${d.judul}" onerror="this.style.display='none'">
+            </div>` : ''}
+            <div class="detail-body">
+                ${d.isi ? `<div class="detail-isi">${d.isi.replace(/\n/g, '<br>')}</div>` : '<p style="color:var(--muted);font-style:italic;">Tidak ada konten.</p>'}
+            </div>`;
+    }
+
+    function renderLomba(d, cfg) {
+        document.title = `${d.judul} — KSI Mist FMIPA UNY`;
+        const now      = new Date();
+        const expired  = d.deadline && new Date(d.deadline) < now;
+        const ddlStr   = formatTanggal(d.deadline);
+
+        // Hitung sisa hari
+        let sisaHari   = null;
+        if (d.deadline && !expired) {
+            const diff = Math.ceil((new Date(d.deadline) - now) / (1000 * 60 * 60 * 24));
+            sisaHari   = diff;
+        }
+
+        root.innerHTML = `
+            <section class="detail-hero section-dark">
+                <div class="detail-hero-inner">
+                    <a href="${cfg.backUrl}" class="detail-back">
+                        <i class="fas fa-arrow-left"></i> Kembali ke ${cfg.label}
+                    </a>
+                    <div class="detail-tipe-badge">
+                        <i class="fas ${cfg.icon}"></i> ${d.jenis || cfg.badgeText}
+                    </div>
+                    <h1 class="detail-judul">${d.judul}</h1>
+                    <div class="detail-meta">
+                        ${d.tingkat ? `<span><i class="fas fa-globe"></i> ${d.tingkat}</span>` : ''}
+                        ${ddlStr    ? `<span><i class="fas fa-clock"></i> Deadline: ${ddlStr} ${expired ? '(Ditutup)' : sisaHari !== null ? `(${sisaHari} hari lagi)` : ''}</span>` : ''}
+                    </div>
+                </div>
+            </section>
+            ${d.thumbnail_url ? `
+            <div class="detail-thumb-wrap">
+                <img src="${d.thumbnail_url}" alt="${d.judul}" onerror="this.style.display='none'">
+            </div>` : ''}
+            <div class="detail-body">
+                <div class="lomba-infobox">
+                    ${d.jenis   ? `<div class="lomba-infobox-item"><div class="lomba-infobox-label">Jenis Lomba</div><div class="lomba-infobox-value">${d.jenis}</div></div>` : ''}
+                    ${d.tingkat ? `<div class="lomba-infobox-item"><div class="lomba-infobox-label">Tingkat</div><div class="lomba-infobox-value">${d.tingkat}</div></div>` : ''}
+                    ${ddlStr    ? `<div class="lomba-infobox-item"><div class="lomba-infobox-label">Deadline</div><div class="lomba-infobox-value ${expired ? 'expired' : sisaHari <= 7 ? 'urgent' : ''}">${ddlStr}${!expired && sisaHari !== null ? `<br><span style="font-size:12px;font-weight:400;">${sisaHari} hari lagi</span>` : ''}</div></div>` : ''}
+                    ${d.tanggal ? `<div class="lomba-infobox-item"><div class="lomba-infobox-label">Diposting</div><div class="lomba-infobox-value">${formatTanggal(d.tanggal)}</div></div>` : ''}
+                </div>
+                ${d.link_daftar && !expired ? `
+                <a href="${d.link_daftar}" target="_blank" rel="noopener noreferrer" class="btn-daftar">
+                    <i class="fas fa-external-link-alt"></i> Daftar / Lihat Flyer
+                </a>` : ''}
+                ${expired ? `<div style="display:inline-block;padding:12px 20px;border-radius:8px;background:rgba(255,255,255,0.05);color:var(--muted);font-size:13px;font-weight:600;margin-bottom:36px;"><i class="fas fa-lock" style="margin-right:8px;"></i>Pendaftaran sudah ditutup</div>` : ''}
+                ${d.isi ? `<div class="detail-isi">${d.isi.replace(/\n/g, '<br>')}</div>` : ''}
+            </div>`;
+    }
+
+    function renderPrestasi(d, cfg) {
+        document.title = `${d.judul} — KSI Mist FMIPA UNY`;
+        const medalMap = { '1': '🥇', '2': '🥈', '3': '🥉' };
+        const medal    = medalMap[d.peringkat] || '🏆';
+        const juaraStr = d.peringkat ? `Juara ${d.peringkat}` : 'Prestasi';
+
+        root.innerHTML = `
+            <section class="detail-hero section-dark">
+                <div class="detail-hero-inner">
+                    <a href="${cfg.backUrl}" class="detail-back">
+                        <i class="fas fa-arrow-left"></i> Kembali ke ${cfg.label}
+                    </a>
+                    <div class="detail-tipe-badge">
+                        <i class="fas ${cfg.icon}"></i> ${cfg.badgeText}
+                    </div>
+                    <h1 class="detail-judul">${d.judul}</h1>
+                    <div class="detail-meta">
+                        ${d.tanggal ? `<span><i class="fas fa-calendar-alt"></i> ${formatTanggal(d.tanggal)}</span>` : ''}
+                        ${d.tingkat_prestasi ? `<span><i class="fas fa-globe"></i> ${d.tingkat_prestasi}</span>` : ''}
+                    </div>
+                </div>
+            </section>
+            ${d.thumbnail_url ? `
+            <div class="detail-thumb-wrap">
+                <img src="${d.thumbnail_url}" alt="${d.judul}" onerror="this.style.display='none'">
+            </div>` : ''}
+            <div class="detail-body">
+                <div class="prestasi-infobox">
+                    <div class="prestasi-medal">${medal}</div>
+                    <div class="prestasi-infobox-text">
+                        <div class="prestasi-juara">${juaraStr}</div>
+                        ${d.nama_kompetisi    ? `<div class="prestasi-kompetisi">${d.nama_kompetisi}</div>` : ''}
+                        ${d.tingkat_prestasi  ? `<div class="prestasi-tingkat">${d.tingkat_prestasi}</div>` : ''}
+                    </div>
+                </div>
+                ${d.anggota_tim ? `
+                <div class="anggota-tim-wrap">
+                    <div class="anggota-tim-label"><i class="fas fa-users" style="margin-right:6px;"></i>Anggota Tim</div>
+                    <div class="anggota-tim-names">${d.anggota_tim.replace(/\n/g, '<br>')}</div>
+                </div>` : ''}
+                ${d.isi ? `<div class="detail-isi" style="margin-top:28px;">${d.isi.replace(/\n/g, '<br>')}</div>` : ''}
+            </div>`;
+    }
+
+    async function initDetail() {
+        if (!itemId || !tipe) {
+            showError('Parameter URL tidak valid. Pastikan URL mengandung id dan tipe.');
+            return;
+        }
+        const cfg = tipeConfig[tipe];
+        if (!cfg) {
+            showError(`Tipe konten "${tipe}" tidak dikenal.`);
+            return;
+        }
+
+        showSkeleton();
+
+        try {
+            const res = await fetch(`${API_URL}/konten/${itemId}`);
+            if (!res.ok) throw new Error('Data tidak ditemukan');
+            const data = await res.json();
+
+            if (tipe === 'artikel')  renderArtikel(data, cfg);
+            if (tipe === 'lomba')    renderLomba(data, cfg);
+            if (tipe === 'prestasi') renderPrestasi(data, cfg);
+
+        } catch (err) {
+            showError(err.message);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initDetail);
+    </script>
+</body>
+</html>
