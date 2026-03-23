@@ -11,230 +11,225 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="output.css">
     <style>
-        /* ── Detail Page Styles ── */
-        .detail-hero {
-            padding-top: 100px;
-            padding-bottom: 0;
-            background: var(--section-dark, #0d0f1a);
-            position: relative;
-            overflow: hidden;
-        }
-        .detail-hero::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: radial-gradient(ellipse at 70% 50%, rgba(139,26,26,0.18) 0%, transparent 70%);
-            pointer-events: none;
-        }
+        .detail-hero { padding-top: 100px; }
         .detail-hero-inner {
             max-width: 860px;
             margin: 0 auto;
-            padding: 60px 24px 48px;
+            padding: 60px 40px 48px;
         }
+        @media (max-width: 768px) {
+            .detail-hero-inner { padding: 40px 20px 36px; }
+        }
+
         .detail-back {
             display: inline-flex;
             align-items: center;
             gap: 8px;
             font-size: 13px;
             font-weight: 600;
-            color: var(--muted, #888);
+            color: rgba(242, 217, 160, 0.5);
             text-decoration: none;
-            margin-bottom: 28px;
+            margin-bottom: 24px;
             transition: color 0.2s;
         }
-        .detail-back:hover { color: var(--primary, #8B1A1A); }
+        .detail-back:hover { color: var(--tersiary); }
 
-        .detail-tipe-badge {
+        .detail-badge {
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 800;
-            letter-spacing: 0.1em;
+            letter-spacing: 0.12em;
             text-transform: uppercase;
-            color: var(--primary, #8B1A1A);
-            background: rgba(139,26,26,0.12);
-            border: 1px solid rgba(139,26,26,0.3);
+            color: var(--tersiary);
+            background: rgba(254, 206, 34, 0.12);
+            border: 1px solid rgba(254, 206, 34, 0.25);
             border-radius: 20px;
             padding: 4px 14px;
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
+
         .detail-judul {
             font-family: 'Plus Jakarta Sans', sans-serif;
-            font-size: clamp(26px, 4vw, 42px);
+            font-size: clamp(24px, 4vw, 40px);
             font-weight: 800;
             line-height: 1.25;
-            color: var(--secondary, #FDF3C0);
-            margin-bottom: 20px;
+            color: var(--secondary);
+            margin-bottom: 18px;
         }
+
         .detail-meta {
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
             font-size: 13px;
-            color: var(--muted, #888);
-            margin-bottom: 0;
+            color: rgba(242, 217, 160, 0.5);
         }
-        .detail-meta span {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .detail-meta i { color: var(--primary, #8B1A1A); }
+        .detail-meta span { display: inline-flex; align-items: center; gap: 6px; }
+        .detail-meta i { color: var(--tersiary); font-size: 11px; }
 
         /* Thumbnail */
         .detail-thumb-wrap {
             max-width: 860px;
             margin: 0 auto;
-            padding: 0 24px;
-            margin-top: -1px;
+            padding: 0 40px;
         }
+        @media (max-width: 768px) { .detail-thumb-wrap { padding: 0 20px; } }
         .detail-thumb-wrap img {
             width: 100%;
-            max-height: 420px;
+            max-height: 440px;
             object-fit: cover;
-            border-radius: 12px;
+            border-radius: 16px;
             display: block;
-            margin-top: 36px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            margin-top: 32px;
+            box-shadow: 0 20px 60px rgba(126, 27, 44, 0.2);
         }
 
-        /* Content Body */
+        /* Body — background cream (mengikuti body) */
         .detail-body {
             max-width: 860px;
             margin: 0 auto;
-            padding: 40px 24px 80px;
+            padding: 48px 40px 80px;
         }
+        @media (max-width: 768px) { .detail-body { padding: 32px 20px 60px; } }
 
-        /* Info Boxes khusus Lomba */
+        /* Infobox Lomba */
         .lomba-infobox {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin-bottom: 36px;
-            padding: 24px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.07);
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 1px;
+            margin-bottom: 32px;
+            background: rgba(126, 27, 44, 0.1);
+            border: 1px solid rgba(126, 27, 44, 0.1);
             border-radius: 12px;
+            overflow: hidden;
         }
         .lomba-infobox-item {
+            background: var(--white);
+            padding: 18px 20px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
         }
         .lomba-infobox-label {
             font-size: 10px;
             font-weight: 700;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: var(--muted, #888);
+            color: var(--text-light);
         }
         .lomba-infobox-value {
             font-size: 15px;
             font-weight: 700;
-            color: var(--secondary, #FDF3C0);
+            color: var(--dark);
+            line-height: 1.3;
         }
-        .lomba-infobox-value.expired { color: var(--muted, #888); text-decoration: line-through; }
-        .lomba-infobox-value.urgent  { color: #f97316; }
+        .lomba-infobox-value.expired { color: var(--text-light); text-decoration: line-through; }
+        .lomba-infobox-value.urgent  { color: #c2410c; }
 
         .btn-daftar {
             display: inline-flex;
             align-items: center;
             gap: 10px;
-            background: var(--primary, #8B1A1A);
-            color: var(--secondary, #FDF3C0);
+            background: var(--primary);
+            color: var(--secondary);
             font-size: 14px;
             font-weight: 700;
             padding: 14px 28px;
             border-radius: 8px;
             text-decoration: none;
             transition: background 0.2s, transform 0.15s;
-            margin-bottom: 36px;
+            margin-bottom: 40px;
         }
-        .btn-daftar:hover { background: #a01f1f; transform: translateY(-2px); }
+        .btn-daftar:hover { background: #5c1220; transform: translateY(-2px); color: var(--secondary); }
 
-        /* Prestasi infobox */
+        .expired-notice {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            background: rgba(126, 27, 44, 0.06);
+            color: var(--text-light);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 40px;
+            border: 1px solid rgba(126, 27, 44, 0.1);
+        }
+
+        /* Infobox Prestasi */
         .prestasi-infobox {
             display: flex;
             align-items: center;
-            gap: 20px;
-            padding: 24px;
-            background: rgba(212,175,55,0.07);
-            border: 1px solid rgba(212,175,55,0.2);
-            border-radius: 12px;
+            gap: 24px;
+            padding: 28px;
+            background: var(--white);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 16px;
             margin-bottom: 32px;
+            box-shadow: 0 4px 20px rgba(126, 27, 44, 0.06);
         }
-        .prestasi-medal {
-            font-size: 56px;
-            line-height: 1;
-            flex-shrink: 0;
-        }
-        .prestasi-infobox-text { display: flex; flex-direction: column; gap: 4px; }
+        .prestasi-medal { font-size: 60px; line-height: 1; flex-shrink: 0; }
+        .prestasi-info-text { display: flex; flex-direction: column; gap: 4px; }
         .prestasi-juara {
-            font-family: 'Bebas Neue', sans-serif;
-            font-size: 28px;
-            color: #D4AF37;
+            font-family: 'Bebas Neue', cursive;
+            font-size: 32px;
+            color: var(--primary);
             letter-spacing: 0.05em;
+            line-height: 1;
         }
-        .prestasi-kompetisi {
-            font-size: 14px;
-            color: var(--muted, #888);
-        }
+        .prestasi-kompetisi { font-size: 15px; color: var(--dark); font-weight: 600; }
         .prestasi-tingkat {
-            font-size: 12px;
-            font-weight: 700;
-            color: var(--primary, #8B1A1A);
+            font-size: 11px;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.1em;
+            color: var(--text-light);
         }
 
-        /* Tim anggota */
-        .anggota-tim-wrap {
-            margin-top: 24px;
-            padding: 16px 20px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 8px;
-            border-left: 3px solid var(--primary, #8B1A1A);
+        /* Anggota Tim */
+        .anggota-tim-box {
+            margin-top: 20px;
+            padding: 18px 22px;
+            background: var(--white);
+            border-radius: 10px;
+            border: 1px solid rgba(126, 27, 44, 0.1);
+            border-left: 4px solid var(--primary);
         }
         .anggota-tim-label {
-            font-size: 11px;
-            font-weight: 700;
+            font-size: 10px;
+            font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            color: var(--muted, #888);
-            margin-bottom: 6px;
+            letter-spacing: 0.1em;
+            color: var(--text-light);
+            margin-bottom: 8px;
         }
-        .anggota-tim-names {
-            font-size: 14px;
-            color: var(--secondary, #FDF3C0);
-            line-height: 1.7;
-        }
+        .anggota-tim-names { font-size: 14px; color: var(--dark); line-height: 1.8; }
 
-        /* Konten Isi (artikel / deskripsi) */
-        .detail-isi {
-            font-size: 16px;
-            line-height: 1.9;
-            color: rgba(253,243,192,0.75);
-        }
+        /* Isi Konten */
+        .detail-isi { font-size: 16px; line-height: 1.9; color: var(--text); }
         .detail-isi p { margin-bottom: 16px; }
 
-        /* Skeleton loader */
+        /* Skeleton */
         .skeleton {
-            background: linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%);
+            background: linear-gradient(90deg,
+                rgba(126,27,44,0.06) 25%,
+                rgba(126,27,44,0.12) 50%,
+                rgba(126,27,44,0.06) 75%);
             background-size: 200% 100%;
             animation: shimmer 1.4s infinite;
             border-radius: 6px;
         }
-        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-
-        /* Error state */
-        .detail-error {
-            text-align: center;
-            padding: 80px 24px;
-            color: var(--muted, #888);
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
-        .detail-error i { font-size: 48px; display: block; margin-bottom: 16px; opacity: 0.3; }
-        .detail-error h2 { font-size: 22px; color: var(--secondary, #FDF3C0); margin-bottom: 8px; }
+
+        /* Error */
+        .detail-error { text-align: center; padding: 80px 24px; color: var(--text-light); }
+        .detail-error i { font-size: 48px; display: block; margin-bottom: 16px; color: var(--primary); opacity: 0.3; }
+        .detail-error h2 { font-size: 22px; color: var(--dark); margin-bottom: 8px; }
     </style>
 </head>
 <body>
@@ -269,7 +264,6 @@
         <button class="navbar-toggle" id="navbar-toggle" aria-label="Toggle menu"><i class="fas fa-bars"></i></button>
     </nav>
 
-    <!-- Konten dinamis akan dirender di sini -->
     <div id="detail-root"></div>
 
     <footer id="hubungi-kami">
@@ -319,43 +313,46 @@
 
     <script src="assets/js/main.js" defer></script>
     <script>
-    // ── Detail Page Logic ──────────────────────────────────
-    const BASE_URL  = 'https://web-ksimist-production.up.railway.app';
-    const API_URL   = `${BASE_URL}/api`;
+    const BASE_URL = 'https://web-ksimist-production.up.railway.app';
+    const API_URL  = `${BASE_URL}/api`;
 
-    const params    = new URLSearchParams(window.location.search);
-    const itemId    = params.get('id');
-    const tipe      = params.get('tipe'); // 'artikel' | 'lomba' | 'prestasi'
-    const root      = document.getElementById('detail-root');
+    const params = new URLSearchParams(window.location.search);
+    const itemId = params.get('id');
+    const tipe   = params.get('tipe');
+    const root   = document.getElementById('detail-root');
 
-    // Label & link kembali per tipe
     const tipeConfig = {
-        artikel:  { label: 'Artikel & Kegiatan', backUrl: 'artikel.html',   icon: 'fa-newspaper',  badgeText: 'Artikel' },
-        lomba:    { label: 'Info Lomba',          backUrl: 'info-lomba.html', icon: 'fa-trophy',     badgeText: 'Info Lomba' },
-        prestasi: { label: 'Galeri Prestasi',     backUrl: 'prestasi.html',  icon: 'fa-medal',      badgeText: 'Prestasi' },
+        artikel:  { label: 'Artikel & Kegiatan', backUrl: 'artikel.html',    icon: 'fa-newspaper', badgeText: 'Artikel'    },
+        lomba:    { label: 'Info Lomba',          backUrl: 'info-lomba.html', icon: 'fa-trophy',    badgeText: 'Info Lomba' },
+        prestasi: { label: 'Galeri Prestasi',     backUrl: 'prestasi.html',   icon: 'fa-medal',     badgeText: 'Prestasi'   },
     };
+
+    function formatTanggal(str) {
+        if (!str) return null;
+        return new Date(str).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
 
     function showSkeleton() {
         root.innerHTML = `
-            <div class="detail-hero">
+            <section class="detail-hero section-dark">
                 <div class="detail-hero-inner">
-                    <div class="skeleton" style="width:100px;height:14px;margin-bottom:28px;"></div>
-                    <div class="skeleton" style="width:120px;height:22px;border-radius:20px;margin-bottom:18px;"></div>
-                    <div class="skeleton" style="width:90%;height:36px;margin-bottom:12px;"></div>
-                    <div class="skeleton" style="width:60%;height:36px;margin-bottom:24px;"></div>
+                    <div class="skeleton" style="width:120px;height:13px;margin-bottom:24px;"></div>
+                    <div class="skeleton" style="width:100px;height:22px;border-radius:20px;margin-bottom:16px;"></div>
+                    <div class="skeleton" style="width:85%;height:32px;margin-bottom:10px;"></div>
+                    <div class="skeleton" style="width:60%;height:32px;margin-bottom:22px;"></div>
                     <div style="display:flex;gap:16px;">
-                        <div class="skeleton" style="width:100px;height:14px;"></div>
-                        <div class="skeleton" style="width:120px;height:14px;"></div>
+                        <div class="skeleton" style="width:90px;height:13px;"></div>
+                        <div class="skeleton" style="width:110px;height:13px;"></div>
                     </div>
                 </div>
-            </div>
+            </section>
             <div class="detail-thumb-wrap">
-                <div class="skeleton" style="width:100%;height:360px;border-radius:12px;margin-top:36px;"></div>
+                <div class="skeleton" style="width:100%;height:380px;border-radius:16px;margin-top:32px;"></div>
             </div>
             <div class="detail-body">
-                <div class="skeleton" style="width:100%;height:14px;margin-bottom:10px;"></div>
-                <div class="skeleton" style="width:95%;height:14px;margin-bottom:10px;"></div>
-                <div class="skeleton" style="width:80%;height:14px;margin-bottom:10px;"></div>
+                <div class="skeleton" style="width:100%;height:13px;margin-bottom:10px;"></div>
+                <div class="skeleton" style="width:92%;height:13px;margin-bottom:10px;"></div>
+                <div class="skeleton" style="width:75%;height:13px;"></div>
             </div>`;
     }
 
@@ -366,14 +363,20 @@
                     <i class="fas fa-exclamation-circle"></i>
                     <h2>Konten Tidak Ditemukan</h2>
                     <p>${msg || 'Data tidak tersedia.'}</p>
-                    <a href="index.html" style="display:inline-block;margin-top:20px;color:var(--primary);font-weight:700;">← Kembali ke Beranda</a>
+                    <a href="index.html" style="display:inline-block;margin-top:20px;color:var(--primary);font-weight:700;text-decoration:none;">← Kembali ke Beranda</a>
                 </div>
             </div>`;
     }
 
-    function formatTanggal(str) {
-        if (!str) return null;
-        return new Date(str).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' });
+    function backBtn(cfg) {
+        return `<a href="${cfg.backUrl}" class="detail-back"><i class="fas fa-arrow-left"></i> Kembali ke ${cfg.label}</a>`;
+    }
+
+    function thumbHtml(item) {
+        if (!item.thumbnail_url) return '';
+        return `<div class="detail-thumb-wrap">
+            <img src="${item.thumbnail_url}" alt="${item.judul}" onerror="this.parentElement.style.display='none'">
+        </div>`;
     }
 
     function renderArtikel(d, cfg) {
@@ -381,72 +384,60 @@
         root.innerHTML = `
             <section class="detail-hero section-dark">
                 <div class="detail-hero-inner">
-                    <a href="${cfg.backUrl}" class="detail-back">
-                        <i class="fas fa-arrow-left"></i> Kembali ke ${cfg.label}
-                    </a>
-                    <div class="detail-tipe-badge">
-                        <i class="fas ${cfg.icon}"></i> ${d.jenis_artikel || cfg.badgeText}
-                    </div>
+                    ${backBtn(cfg)}
+                    <div class="detail-badge"><i class="fas ${cfg.icon}"></i> ${d.jenis_artikel || cfg.badgeText}</div>
                     <h1 class="detail-judul">${d.judul}</h1>
                     <div class="detail-meta">
-                        ${d.tanggal ? `<span><i class="fas fa-calendar-alt"></i> ${formatTanggal(d.tanggal)}</span>` : ''}
+                        ${d.tanggal ? `<span><i class="fas fa-calendar-alt"></i>${formatTanggal(d.tanggal)}</span>` : ''}
                     </div>
                 </div>
             </section>
-            ${d.thumbnail_url ? `
-            <div class="detail-thumb-wrap">
-                <img src="${d.thumbnail_url}" alt="${d.judul}" onerror="this.style.display='none'">
-            </div>` : ''}
+            ${thumbHtml(d)}
             <div class="detail-body">
-                ${d.isi ? `<div class="detail-isi">${d.isi.replace(/\n/g, '<br>')}</div>` : '<p style="color:var(--muted);font-style:italic;">Tidak ada konten.</p>'}
+                ${d.isi ? `<div class="detail-isi">${d.isi.replace(/\n/g, '<br>')}</div>`
+                        : `<p style="color:var(--text-light);font-style:italic;">Tidak ada konten tersedia.</p>`}
             </div>`;
     }
 
     function renderLomba(d, cfg) {
         document.title = `${d.judul} — KSI Mist FMIPA UNY`;
-        const now      = new Date();
-        const expired  = d.deadline && new Date(d.deadline) < now;
-        const ddlStr   = formatTanggal(d.deadline);
-
-        // Hitung sisa hari
-        let sisaHari   = null;
+        const now     = new Date();
+        const expired = d.deadline && new Date(d.deadline) < now;
+        const ddlStr  = formatTanggal(d.deadline);
+        let sisaHari  = null;
         if (d.deadline && !expired) {
-            const diff = Math.ceil((new Date(d.deadline) - now) / (1000 * 60 * 60 * 24));
-            sisaHari   = diff;
+            sisaHari = Math.ceil((new Date(d.deadline) - now) / (1000 * 60 * 60 * 24));
         }
-
         root.innerHTML = `
             <section class="detail-hero section-dark">
                 <div class="detail-hero-inner">
-                    <a href="${cfg.backUrl}" class="detail-back">
-                        <i class="fas fa-arrow-left"></i> Kembali ke ${cfg.label}
-                    </a>
-                    <div class="detail-tipe-badge">
-                        <i class="fas ${cfg.icon}"></i> ${d.jenis || cfg.badgeText}
-                    </div>
+                    ${backBtn(cfg)}
+                    <div class="detail-badge"><i class="fas ${cfg.icon}"></i> ${d.jenis || cfg.badgeText}</div>
                     <h1 class="detail-judul">${d.judul}</h1>
                     <div class="detail-meta">
-                        ${d.tingkat ? `<span><i class="fas fa-globe"></i> ${d.tingkat}</span>` : ''}
-                        ${ddlStr    ? `<span><i class="fas fa-clock"></i> Deadline: ${ddlStr} ${expired ? '(Ditutup)' : sisaHari !== null ? `(${sisaHari} hari lagi)` : ''}</span>` : ''}
+                        ${d.tingkat ? `<span><i class="fas fa-globe"></i>${d.tingkat}</span>` : ''}
+                        ${ddlStr    ? `<span><i class="fas fa-clock"></i>Deadline: ${ddlStr}${expired ? ' (Ditutup)' : sisaHari !== null ? ` · ${sisaHari} hari lagi` : ''}</span>` : ''}
                     </div>
                 </div>
             </section>
-            ${d.thumbnail_url ? `
-            <div class="detail-thumb-wrap">
-                <img src="${d.thumbnail_url}" alt="${d.judul}" onerror="this.style.display='none'">
-            </div>` : ''}
+            ${thumbHtml(d)}
             <div class="detail-body">
                 <div class="lomba-infobox">
                     ${d.jenis   ? `<div class="lomba-infobox-item"><div class="lomba-infobox-label">Jenis Lomba</div><div class="lomba-infobox-value">${d.jenis}</div></div>` : ''}
                     ${d.tingkat ? `<div class="lomba-infobox-item"><div class="lomba-infobox-label">Tingkat</div><div class="lomba-infobox-value">${d.tingkat}</div></div>` : ''}
-                    ${ddlStr    ? `<div class="lomba-infobox-item"><div class="lomba-infobox-label">Deadline</div><div class="lomba-infobox-value ${expired ? 'expired' : sisaHari <= 7 ? 'urgent' : ''}">${ddlStr}${!expired && sisaHari !== null ? `<br><span style="font-size:12px;font-weight:400;">${sisaHari} hari lagi</span>` : ''}</div></div>` : ''}
+                    ${ddlStr    ? `<div class="lomba-infobox-item">
+                                    <div class="lomba-infobox-label">Deadline Pendaftaran</div>
+                                    <div class="lomba-infobox-value ${expired ? 'expired' : sisaHari !== null && sisaHari <= 7 ? 'urgent' : ''}">
+                                        ${ddlStr}
+                                        ${!expired && sisaHari !== null ? `<br><span style="font-size:12px;font-weight:500;color:var(--text-light);">${sisaHari} hari lagi</span>` : ''}
+                                    </div>
+                                  </div>` : ''}
                     ${d.tanggal ? `<div class="lomba-infobox-item"><div class="lomba-infobox-label">Diposting</div><div class="lomba-infobox-value">${formatTanggal(d.tanggal)}</div></div>` : ''}
                 </div>
-                ${d.link_daftar && !expired ? `
-                <a href="${d.link_daftar}" target="_blank" rel="noopener noreferrer" class="btn-daftar">
-                    <i class="fas fa-external-link-alt"></i> Daftar / Lihat Flyer
-                </a>` : ''}
-                ${expired ? `<div style="display:inline-block;padding:12px 20px;border-radius:8px;background:rgba(255,255,255,0.05);color:var(--muted);font-size:13px;font-weight:600;margin-bottom:36px;"><i class="fas fa-lock" style="margin-right:8px;"></i>Pendaftaran sudah ditutup</div>` : ''}
+                ${d.link_daftar && !expired
+                    ? `<a href="${d.link_daftar}" target="_blank" rel="noopener noreferrer" class="btn-daftar"><i class="fas fa-external-link-alt"></i> Daftar / Lihat Flyer</a>`
+                    : ''}
+                ${expired ? `<div class="expired-notice"><i class="fas fa-lock"></i> Pendaftaran sudah ditutup</div>` : ''}
                 ${d.isi ? `<div class="detail-isi">${d.isi.replace(/\n/g, '<br>')}</div>` : ''}
             </div>`;
     }
@@ -456,67 +447,50 @@
         const medalMap = { '1': '🥇', '2': '🥈', '3': '🥉' };
         const medal    = medalMap[d.peringkat] || '🏆';
         const juaraStr = d.peringkat ? `Juara ${d.peringkat}` : 'Prestasi';
-
         root.innerHTML = `
             <section class="detail-hero section-dark">
                 <div class="detail-hero-inner">
-                    <a href="${cfg.backUrl}" class="detail-back">
-                        <i class="fas fa-arrow-left"></i> Kembali ke ${cfg.label}
-                    </a>
-                    <div class="detail-tipe-badge">
-                        <i class="fas ${cfg.icon}"></i> ${cfg.badgeText}
-                    </div>
+                    ${backBtn(cfg)}
+                    <div class="detail-badge"><i class="fas ${cfg.icon}"></i> ${cfg.badgeText}</div>
                     <h1 class="detail-judul">${d.judul}</h1>
                     <div class="detail-meta">
-                        ${d.tanggal ? `<span><i class="fas fa-calendar-alt"></i> ${formatTanggal(d.tanggal)}</span>` : ''}
-                        ${d.tingkat_prestasi ? `<span><i class="fas fa-globe"></i> ${d.tingkat_prestasi}</span>` : ''}
+                        ${d.tanggal          ? `<span><i class="fas fa-calendar-alt"></i>${formatTanggal(d.tanggal)}</span>` : ''}
+                        ${d.tingkat_prestasi ? `<span><i class="fas fa-globe"></i>${d.tingkat_prestasi}</span>` : ''}
                     </div>
                 </div>
             </section>
-            ${d.thumbnail_url ? `
-            <div class="detail-thumb-wrap">
-                <img src="${d.thumbnail_url}" alt="${d.judul}" onerror="this.style.display='none'">
-            </div>` : ''}
+            ${thumbHtml(d)}
             <div class="detail-body">
                 <div class="prestasi-infobox">
                     <div class="prestasi-medal">${medal}</div>
-                    <div class="prestasi-infobox-text">
+                    <div class="prestasi-info-text">
                         <div class="prestasi-juara">${juaraStr}</div>
-                        ${d.nama_kompetisi    ? `<div class="prestasi-kompetisi">${d.nama_kompetisi}</div>` : ''}
-                        ${d.tingkat_prestasi  ? `<div class="prestasi-tingkat">${d.tingkat_prestasi}</div>` : ''}
+                        ${d.nama_kompetisi   ? `<div class="prestasi-kompetisi">${d.nama_kompetisi}</div>` : ''}
+                        ${d.tingkat_prestasi ? `<div class="prestasi-tingkat">${d.tingkat_prestasi}</div>` : ''}
                     </div>
                 </div>
                 ${d.anggota_tim ? `
-                <div class="anggota-tim-wrap">
-                    <div class="anggota-tim-label"><i class="fas fa-users" style="margin-right:6px;"></i>Anggota Tim</div>
-                    <div class="anggota-tim-names">${d.anggota_tim.replace(/\n/g, '<br>')}</div>
-                </div>` : ''}
+                    <div class="anggota-tim-box">
+                        <div class="anggota-tim-label"><i class="fas fa-users" style="margin-right:6px;"></i>Anggota Tim</div>
+                        <div class="anggota-tim-names">${d.anggota_tim.replace(/\n/g, '<br>')}</div>
+                    </div>` : ''}
                 ${d.isi ? `<div class="detail-isi" style="margin-top:28px;">${d.isi.replace(/\n/g, '<br>')}</div>` : ''}
             </div>`;
     }
 
     async function initDetail() {
-        if (!itemId || !tipe) {
-            showError('Parameter URL tidak valid. Pastikan URL mengandung id dan tipe.');
-            return;
-        }
+        if (!itemId || !tipe) { showError('Parameter URL tidak valid.'); return; }
         const cfg = tipeConfig[tipe];
-        if (!cfg) {
-            showError(`Tipe konten "${tipe}" tidak dikenal.`);
-            return;
-        }
+        if (!cfg) { showError(`Tipe konten "${tipe}" tidak dikenal.`); return; }
 
         showSkeleton();
-
         try {
             const res = await fetch(`${API_URL}/konten/${itemId}`);
-            if (!res.ok) throw new Error('Data tidak ditemukan');
+            if (!res.ok) throw new Error('Data tidak ditemukan di server.');
             const data = await res.json();
-
             if (tipe === 'artikel')  renderArtikel(data, cfg);
             if (tipe === 'lomba')    renderLomba(data, cfg);
             if (tipe === 'prestasi') renderPrestasi(data, cfg);
-
         } catch (err) {
             showError(err.message);
         }
