@@ -158,6 +158,7 @@ function switchTab(tab) {
     if (tab === 'prestasi') loadKonten('prestasi');
     if (tab === 'pengurus') loadPengurus();
     if (tab === 'beranda')  loadStats();
+    if (tab === 'pesan')    loadPesan();
 
     // Tutup sidebar di mobile setelah navigasi
     const sidebar = document.getElementById('sidebar');
@@ -592,7 +593,9 @@ async function loadPesan() {
         <span class="spinner" style="border-color:rgba(255,255,255,0.1);border-top-color:#8B1A1A;width:28px;height:28px;"></span>
     </div>`;
 
-    const data = await fetch(`${API}/pesan`).then(r => r.json()).catch(() => []);
+    const data = await fetch(`${API}/pesan`, {
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+    }).then(r => r.json()).catch(() => []);
 
     if (!data.length) {
         wadah.innerHTML = `<div class="text-center py-16 text-gray-500">
@@ -628,14 +631,20 @@ async function loadPesan() {
 }
 
 async function bacaPesan(id) {
-    await fetch(`${API}/pesan/${id}/baca`, { method: 'PATCH' });
+    await fetch(`${API}/pesan/${id}/baca`, {
+        method: 'PATCH',
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+    });
     loadPesan();
     loadStats();
 }
 
 async function hapusPesan(id) {
     if (!confirm('Hapus pesan ini?')) return;
-    const res = await fetch(`${API}/pesan/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API}/pesan/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${getToken()}` }
+    });
     if (res.ok) { toast('Pesan dihapus!'); loadPesan(); loadStats(); }
     else toast('Gagal', 'error');
 }
