@@ -1,1 +1,1 @@
-{"install":{"cmd":"npm install"}}
+{"install":{"cmd":"npm install"},"start":{"cmd":"node api/server.js"}}
