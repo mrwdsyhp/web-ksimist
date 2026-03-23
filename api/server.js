@@ -41,8 +41,23 @@ app.use(express.urlencoded({ extended: true }));
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 app.use('/uploads', express.static(uploadDir));
-app.use(express.static(path.join(__dirname)));       // serve folder /api/
-app.use(express.static(path.join(__dirname, '..'))); // serve folder root (index.html, admin/, dll)
+
+// Serve semua file statis dari root project
+const rootDir = path.resolve(__dirname, '..');
+app.use(express.static(rootDir));
+app.use(express.static(path.join(__dirname)));
+
+// Fallback eksplisit untuk halaman-halaman utama
+app.get('/',                  (req, res) => res.sendFile(path.join(rootDir, 'index.html')));
+app.get('/index.html',        (req, res) => res.sendFile(path.join(rootDir, 'index.html')));
+app.get('/admin/login.html',  (req, res) => res.sendFile(path.join(rootDir, 'admin', 'login.html')));
+app.get('/admin/admin.html',  (req, res) => res.sendFile(path.join(rootDir, 'admin', 'admin.html')));
+app.get('/artikel.html',      (req, res) => res.sendFile(path.join(rootDir, 'artikel.html')));
+app.get('/departemen.html',   (req, res) => res.sendFile(path.join(rootDir, 'departemen.html')));
+app.get('/info-lomba.html',   (req, res) => res.sendFile(path.join(rootDir, 'info-lomba.html')));
+app.get('/prestasi.html',     (req, res) => res.sendFile(path.join(rootDir, 'prestasi.html')));
+app.get('/hubungi-kami.html', (req, res) => res.sendFile(path.join(rootDir, 'hubungi-kami.html')));
+app.get('/detail-departemen.html', (req, res) => res.sendFile(path.join(rootDir, 'detail-departemen.html')));
 
 // ─── Koneksi MySQL ────────────────────────────────────────
 let db;
