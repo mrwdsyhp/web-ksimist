@@ -16,6 +16,7 @@
  */
 
 'use strict';
+const BASE_URL = 'https://web-ksimist.up.railway.app';
 
 const express = require('express');
 const mysql   = require('mysql2/promise');
